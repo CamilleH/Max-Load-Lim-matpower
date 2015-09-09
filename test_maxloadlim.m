@@ -1,64 +1,57 @@
-function tests = test_maxloadlim
-tests = functiontests(localfunctions);
+classdef Test_maxloadlim < matlab.unittest.TestCase
+    
+    properties
+        directions = [1 0 0;
+            0 1 0;
+            0 0 1;
+            1 1 1;
+            1 1 0;
+            1 0 1;
+            0 1 1]';
+    end
+    properties(TestParameter)
+        idx_dir = num2cell(1:7);
+    end
+    methods(TestClassSetup)
+        function setuptests(testcase)
+            % This is to turn off the warnings in the CPF when we get close
+            % to the nose
+            warning off MATLAB:singularMatrix
+            warning off MATLAB:nearlySingularMatrix
+            clc;
+        end
+    end
+    
+    methods(TestClassTeardown)
+        function teardownOnce(testcase)
+            warning on MATLAB:singularMatrix
+            warning on MATLAB:nearlySingularMatrix
+        end
+    end
+    
+    methods(Test)        
+        function testAgainstCPF(testCase,idx_dir)
+            % Loading the case
+            mpc = loadcase('case9');
+            dir = testCase.directions(:,idx_dir);
+            dir = dir/norm(dir);
+            results_mp = maxloadlim(mpc,dir,0);
+            mll_mp = -results_mp.f;
+            results_cpf = ch_runCPF('case9static','loads568',0,dir);
+            mll_cpf = results_cpf.lambda;
+            testCase.verifyEqual(mll_mp,mll_cpf,'RelTol',1e-2);
+        end
+        
+        function testAgainstYalmip(testCase,idx_dir)
+            % Loading the case
+            mpc = loadcase('case9');
+            dir = testCase.directions(:,idx_dir);
+            dir = dir/norm(dir);
+            results_mp = maxloadlim(mpc,dir,0);
+            mll_mp = -results_mp.f;
+            results_yal = findmaxll('case9static','loads568',dir);
+            mll_yal = results_yal.lambda;
+            testCase.verifyEqual(mll_mp,mll_yal,'RelTol',1e-2);
+        end
+    end
 end
-
-function setupOnce(testcase)
-warning off MATLAB:singularMatrix
-warning off MATLAB:nearlySingularMatrix
-end
-
-function teardownOnce(testcase)
-warning on MATLAB:singularMatrix
-warning on MATLAB:nearlySingularMatrix
-end
-
-function testFunctionOne(testCase)
-% Loading the case
-mpc = loadcase('case9');
-dir = [1;1;1];
-dir = dir/norm(dir);
-results = maxloadlim(mpc,dir);
-results2 = ch_runCPF('case9static','loads568',0,dir);
-assert(abs(abs(results.x(end))-results2.lambda)<0.05);
-end
-
-function testFunctionTwo(testCase)
-% Loading the case
-mpc = loadcase('case9');
-dir = [1;0;1];
-dir = dir/norm(dir);
-results = maxloadlim(mpc,dir);
-results2 = ch_runCPF('case9static','loads568',0,dir);
-assert(abs(abs(results.x(end))-results2.lambda)<0.05);
-end
-
-function testFunctionThree(testCase)
-% Loading the case
-mpc = loadcase('case9');
-dir = [1;0;0];
-dir = dir/norm(dir);
-results = maxloadlim(mpc,dir);
-results2 = ch_runCPF('case9static','loads568',0,dir);
-assert(abs(abs(results.x(end))-results2.lambda)<0.05);
-end
-
-
-% % Creating different directions
-% dirs = eye(3);
-% dir_others = [1 1 1;
-%     1 1 0;
-%     1 0 1;
-%     0 1 1]';
-% dirs = [dirs dir_others];
-% % Normalizing the search directions
-% norms = sqrt(sum(abs(dirs').^2,2));
-% dirs = bsxfun(@rdivide,dirs,norms');
-% 
-% %% Testing directions
-% for i=1:length(dirs)
-%     diri = dirs(:,i);
-%     results = maxloadlim(mpc,diri);
-%     results2 = ch_runCPF('case9static','loads568',0,diri);
-%     assert(abs(abs(results.x(end))-results2.lambda)<0.05);
-% end
-% end
