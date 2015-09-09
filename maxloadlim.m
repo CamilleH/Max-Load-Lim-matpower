@@ -5,6 +5,6 @@ function results = maxloadlim(mpc,dir_mll)
 mpc_vl = prepare_maxll(mpc,dir_mll);
 
 % Run opf
-mpopt = mpoption('verbose',3,'opf.init_from_mpc',1);
+mpopt = mpoption('out.all',0,'verbose',0,'opf.init_from_mpc',1);
 results = runopf(mpc_vl,mpopt);
 end
