@@ -6,8 +6,6 @@ function mpc_vl = prepare_maxll(mpc,dir_mll)
 %   adding a field for the direction DIR_MLL of load increase and adapting 
 %   limits for the future OPF formulation.
 %   
-%   The following constraints are added or changed:
-%   1. 
 
 define_constants;
 % Convert all loads to dispatchable
