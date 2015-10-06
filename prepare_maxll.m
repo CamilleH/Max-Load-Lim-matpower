@@ -11,6 +11,13 @@ define_constants;
 % Convert all loads to dispatchable
 mpc_vl = load2disp(mpc);
 
+% Extract the part of dir_mll corresponding to nonzero loads
+dir_mll_ori = dir_mll;
+dir_mll = dir_mll(mpc.bus(:, PD) > 0);
+% Verify that there is no direction of load increase in zero loads
+if sum(dir_mll_ori(mpc.bus(:, PD) == 0))
+    error('Load increase is defined in directions of zero loads')
+end
 % Add a field to mpc_vl for the load increase
 mpc_vl.dir_mll = dir_mll;
 
