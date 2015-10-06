@@ -61,10 +61,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             % Get nonzero loads
             idx_nonzero_loads = res_maxloadlim.bus(:,PD) > 0;
             max_loads = res_maxloadlim.bus(idx_nonzero_loads,PD)/res_maxloadlim.baseMVA;
-%             mll_mp = -results_mp.f;
             max_loads_theo = testCase.max_load_lims.('case2');
-%             results_yal = findmaxll('case2',idxVarPQ,dir);
-%             mll_yal = results_yal.lambda;
             testCase.verifyEqual(max_loads,max_loads_theo,'RelTol',1e-2);
         end
     end

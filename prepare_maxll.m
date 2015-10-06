@@ -4,20 +4,33 @@ function mpc_vl = prepare_maxll(mpc,dir_mll)
 %   MPC_VL = PREPARE_MAXLL(MPC,DIR_MLL) returns the matpower case MPC_VL
 %   prepared from MPC by transforming all loads to dispatchable loads,
 %   adding a field for the direction DIR_MLL of load increase and adapting 
-%   limits for the future OPF formulation.
+%   limits for the OPF formulation.
 %   
 
 define_constants;
+
+%% CHECKS
+% Check whether the number of directions of load increases is equal to the
+% number of buses
+if size(mpc.bus,1) ~= length(dir_mll)
+    error_msg = ['The number of directions of load increases ' ...
+        'is not equal to the number of buses'];
+    error(error_msg);
+end
+
+% Check whether load increases have been defined for zero loads
+idx_zero_loads = mpc.bus(:,PD) == 0;
+if sum(dir_mll(idx_zero_loads))>0
+    error('Directions of load increases cannot be defined for zero loads.');
+end
+
+%% Preparation of the case mpc_vl
 % Convert all loads to dispatchable
 mpc_vl = load2disp(mpc);
 
 % Extract the part of dir_mll corresponding to nonzero loads
-dir_mll_ori = dir_mll;
 dir_mll = dir_mll(mpc.bus(:, PD) > 0);
-% Verify that there is no direction of load increase in zero loads
-if sum(dir_mll_ori(mpc.bus(:, PD) == 0))
-    error('Load increase is defined in directions of zero loads')
-end
+
 % Add a field to mpc_vl for the load increase
 mpc_vl.dir_mll = dir_mll;
 

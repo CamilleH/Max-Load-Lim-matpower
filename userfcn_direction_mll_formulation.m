@@ -1,6 +1,7 @@
 function om = userfcn_direction_mll_formulation(om,args)
 % USERFCN_DIRECTION_MLL_FORMULATION adds one variable and as many
 % constraints as dispatchable loads to enforce the load increase direction
+
 define_constants;
 mpc = get_mpc(om);
 dir_mll = mpc.dir_mll;
@@ -27,14 +28,4 @@ A_dirmll = sparse(idx_A_dirmll_i,idx_A_dirmll_j,vals_A_dirmll,n_vl,n_g+n_vl+1);
 om = add_constraints(om,'dir_mll',A_dirmll,-Pl0,-Pl0,{'Pg','alpha'});
 % Add cost of alpha to -1 to maximize loads in the given direction
 om = add_costs(om,'alpha_cost',struct('Cw',-1),{'alpha'});
-
-% Set the constraint on the generation Pg_min = Pg_max = Pg0 for the PV
-% buses (not for the slack bus)
-% [ref, pv, pq] = bustypes(mpc.bus, mpc.gen);
-% idx_gen_pv = find(ismember(mpc.gen(:,GEN_BUS),pv));
-% n_pv = length(pv);
-% Pg0 = mpc.gen(idx_gen_pv,PG);
-% A_pg = sparse(1:n_pv,idx_gen_pv,ones(n_pv,1),n_pv,n_g+n_vl);
-% om = add_constraints(om,'Pgfixed',A_pg,Pg0,Pg0,{'Pg'});
-% keyboard;
 end
