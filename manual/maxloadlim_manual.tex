@@ -166,9 +166,10 @@ The functions in Table \ref{tab:functions} are used to set up and solving the ma
   \toprule
   Name  & Description \\
   \midrule
-  \codemat{maxloadlim} & \\
-  \codemat{prepare\_maxll} & \\
-  \codemat{userfcn\_direction\_mll\_formulation} & \\
+  \codemat{maxloadlim} & Main function for solving the maximum loadability limit problem.\\
+  \codemat{prepare\_maxll} & Prepares the \matpower case before the AC OPF is run, see Section \ref{sec:adjust-matp-case}.\\
+  \codemat{userfcn\_direction\_mll\_formulation} & Callback function to define new variables, constraints and costs, see Section \ref{sec:defin-vari-alpha}. \\
+  \codemat{postproc\_maxloadlim} & Post-processing function that transforms the dispatchable loads back to normal loads.\\
   \bottomrule
   \end{tabular}
   \caption{Functions used for the maximum loadability limit problem}

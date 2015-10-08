@@ -1,4 +1,4 @@
-function mpc_vl = prepare_maxll(mpc,dir_mll)
+function mpc_vl = prepare_maxloadlim(mpc,dir_mll)
 % PREPARE_MAXSLL prepares the mpc case for computing the maximum
 % loadability limit by adding the relevant constraints and variables.
 %   MPC_VL = PREPARE_MAXLL(MPC,DIR_MLL) returns the matpower case MPC_VL
@@ -30,6 +30,9 @@ mpc_vl = load2disp(mpc);
 
 % Extract the part of dir_mll corresponding to nonzero loads
 dir_mll = dir_mll(mpc.bus(:, PD) > 0);
+
+% Normalize the direction of load increase
+dir_mll = dir_mll/norm(dir_mll);
 
 % Add a field to mpc_vl for the load increase
 mpc_vl.dir_mll = dir_mll;

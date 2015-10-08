@@ -40,9 +40,8 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             mpc = loadcase('case9');
             dir_all = testCase.directions.('case9');
             dir = dir_all(:,idx_dir);
-            dir = dir/norm(dir);
-            results_mp = maxloadlim(mpc,dir,0);
-            mll_mp = -results_mp.f;
+            results_mp = maxloadlim(mpc,dir);
+            mll_mp = results_mp.stab_marg;
             % Remember to set chooseStartPoint to 0 in ch_runCPF
             idx_nonzero_loads = mpc.bus(:,PD) > 0;
             dirCPF = dir(idx_nonzero_loads);
@@ -56,8 +55,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             % Loading the case
             mpc = loadcase('case2');
             dir = testCase.directions.('case2');
-            dir = dir/norm(dir);
-            res_maxloadlim = maxloadlim(mpc,dir,0);
+            res_maxloadlim = maxloadlim(mpc,dir);
             % Get nonzero loads
             idx_nonzero_loads = res_maxloadlim.bus(:,PD) > 0;
             max_loads = res_maxloadlim.bus(idx_nonzero_loads,PD)/res_maxloadlim.baseMVA;
