@@ -1,4 +1,4 @@
-function results = maxloadlim(mpc,dir_mll)
+function results = maxloadlim(mpc,dir_mll,varargin)
 % MAXLOADLIM computes the maximum loadability limit in one direction. It
 % uses dispatchable loads in MATPOWER
 %   RESULTS = MAXLOADLIM(MPC,DIR_MLL) returns the results from the
@@ -14,7 +14,7 @@ function results = maxloadlim(mpc,dir_mll)
 define_constants;
 
 %% Prepare the matpower case for the maximum loadability limit problem
-mpc_vl = prepare_maxloadlim(mpc,dir_mll);
+mpc_vl = prepare_maxloadlim(mpc,dir_mll,varargin{:});
 
 %% Run opf
 % Turning off the printing and initializing from the base case

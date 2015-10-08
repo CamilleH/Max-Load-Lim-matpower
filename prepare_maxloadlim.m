@@ -1,4 +1,4 @@
-function mpc_vl = prepare_maxloadlim(mpc,dir_mll)
+function mpc_vl = prepare_maxloadlim(mpc,dir_mll,varargin)
 % PREPARE_MAXSLL prepares the mpc case for computing the maximum
 % loadability limit by adding the relevant constraints and variables.
 %   MPC_VL = PREPARE_MAXLL(MPC,DIR_MLL) returns the matpower case MPC_VL
@@ -22,6 +22,36 @@ end
 idx_zero_loads = mpc.bus(:,PD) == 0;
 if sum(dir_mll(idx_zero_loads))>0
     error('Directions of load increases cannot be defined for zero loads.');
+end
+
+% Checking the options, if any
+if ~isempty(varargin)
+    % The options come in pair of an option name and its value
+    if mod(length(varargin),2) ~= 0
+        error('Please provide both the option name and its value');
+    end
+    % The option name must be one of the known ones
+    known_options = {'use_qlim'};
+    for i = 1:3:(length(varargin)-1)
+        option_name = varargin{i};
+        option_value = varargin{i+1};
+        if ~ischar(varargin{i})
+            error('The name of the options must be provided as strings.');
+        end
+        if sum(strcmp(option_name,known_options)) == 0
+            error('Unknown option name.');
+        end
+        switch option_name
+            case known_options{1}
+                % Qlim
+                if ~isfloat(option_value)
+                    error('The value for the use_qlim option must be a float');
+                end
+                use_qlim = option_value;
+        end
+    end
+else
+    use_qlim = 1;
 end
 
 %% Preparation of the case mpc_vl
@@ -66,6 +96,13 @@ mpc_vl.bus(ref,VMIN) = mpc_vl.gen(idx_gen_slack,VG);
 % Put Vmax = Vset and low Vmin for all pv buses
 mpc_vl.bus(pv,VMAX) = mpc_vl.gen(idx_gen_pv,VG);
 mpc_vl.bus(pv,VMIN) = 0.01;
+% If we do not consider Qlim, increase Qlim of all generators to
+% arbitrarily large values
+if ~use_qlim
+    mpc_vl.gen(idx_gen_pv,QMAX) = 9999;
+    mpc_vl.bus(pv,VMAX) = mpc_vl.gen(idx_gen_pv,VG);
+    mpc_vl.bus(pv,VMIN) = mpc_vl.gen(idx_gen_pv,VG);
+end
 
 % Build the constraint for enforcing the direction of load increase
 mpc_vl = add_userfcn(mpc_vl, 'formulation', @userfcn_direction_mll_formulation);
