@@ -42,8 +42,6 @@ mpc_vl.gen(idx_vl,PMIN) = 100*mpc_vl.gen(idx_vl,PMIN);
 % Adjust Qmin so that Qmin/Pmin is the power factor of the load
 mpc_vl.gen(idx_vl,QMIN) = mpc_vl.gen(idx_vl,PMIN).*tanphi_vl;
 % Make the cost zero
-mpc_vl.gencost(idx_vl,[COST COST+1]) = 0;
-% make the cost for generation to zero
 mpc_vl.gencost(:,COST:end) = 0;
 % Make the generators not dispatchable
 [ref, pv, pq] = bustypes(mpc_vl.bus, mpc_vl.gen);

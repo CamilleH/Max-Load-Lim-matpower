@@ -1,1 +1,6 @@
 *.asv
+*.pdf
+*.aux
+*.log
+*.gz
+*.tex~

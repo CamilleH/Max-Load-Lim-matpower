@@ -20,7 +20,6 @@ om = add_vars(om,'alpha',1,0,0,inf);
 
 % Add the constraint for enforcing the direction of load increase
 Pl0 = -mpc.gen(idx_vl,PG)/mpc.baseMVA;
-% A_dirmll = [zeros(n_vl,n_g) eye(n_vl,n_g) dir_mll];
 idx_A_dirmll_i = [1:n_vl 1:n_vl]';
 idx_A_dirmll_j = [n_g+(1:n_vl) (n_g+n_vl+1)*ones(1,n_vl)]';
 vals_A_dirmll = [ones(n_vl,1);dir_mll];
