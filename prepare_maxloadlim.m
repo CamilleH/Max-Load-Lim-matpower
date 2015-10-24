@@ -24,35 +24,24 @@ if sum(dir_mll(idx_zero_loads))>0
     error('Directions of load increases cannot be defined for zero loads.');
 end
 
-% Checking the options, if any
-if ~isempty(varargin)
-    % The options come in pair of an option name and its value
-    if mod(length(varargin),2) ~= 0
-        error('Please provide both the option name and its value');
-    end
-    % The option name must be one of the known ones
-    known_options = {'use_qlim'};
-    for i = 1:3:(length(varargin)-1)
-        option_name = varargin{i};
-        option_value = varargin{i+1};
-        if ~ischar(varargin{i})
-            error('The name of the options must be provided as strings.');
-        end
-        if sum(strcmp(option_name,known_options)) == 0
-            error('Unknown option name.');
-        end
-        switch option_name
-            case known_options{1}
-                % Qlim
-                if ~isfloat(option_value)
-                    error('The value for the use_qlim option must be a float');
-                end
-                use_qlim = option_value;
-        end
-    end
-else
-    use_qlim = 1;
-end
+%% Checking the options, if any
+input_checker = inputParser;
+
+% Verbose
+default_verbose = 0;
+verbose_levels = [0;1];
+check_verbose = @(x)(isnumeric(x) && isscalar(x) && any(x == verbose_levels));
+addParameter(input_checker,'verbose',default_verbose,check_verbose);
+
+% Q-lims
+default_qlim = 1;
+check_qlim = @(x)(isnumeric(x) && isscalar(x));
+addParameter(input_checker,'use_qlim',default_qlim,check_qlim);
+
+% Parse
+input_checker.KeepUnmatched = true;
+parse(input_checker,varargin{:});
+options = input_checker.Results;
 
 %% Preparation of the case mpc_vl
 % Convert all loads to dispatchable
@@ -98,7 +87,7 @@ mpc_vl.bus(pv,VMAX) = mpc_vl.gen(idx_gen_pv,VG);
 mpc_vl.bus(pv,VMIN) = 0.01;
 % If we do not consider Qlim, increase Qlim of all generators to
 % arbitrarily large values
-if ~use_qlim
+if ~options.use_qlim
     mpc_vl.gen(idx_gen_pv,QMAX) = 9999;
     mpc_vl.bus(pv,VMAX) = mpc_vl.gen(idx_gen_pv,VG);
     mpc_vl.bus(pv,VMIN) = mpc_vl.gen(idx_gen_pv,VG);

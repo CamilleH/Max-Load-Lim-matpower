@@ -40,7 +40,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             mpc = loadcase('case9');
             dir_all = testCase.directions.('case9');
             dir = dir_all(:,idx_dir);
-            results_mll = maxloadlim(mpc,dir);
+            results_mll = maxloadlim(mpc,dir,'verbose',1);
             max_loads_mll = results_mll.bus(:,PD);
             % Remember to set chooseStartPoint to 0 in ch_runCPF
             idx_nonzero_loads = mpc.bus(:,PD) > 0;
@@ -63,7 +63,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             mpc_target.bus(:,PD) = mpc_target.bus(:,PD)+2*dir*mpc_target.baseMVA;
             mpc_target.bus(nonzero_loads,QD) = Q_P.*mpc_target.bus(nonzero_loads,PD);
             % Run the CPF with matpower
-            [results,~] = runcpf(mpc,mpc_target);
+            [results,~] = runcpf(mpc,mpc_target,mpoption('out.all',0));
             % Extract the maximum loads
             max_loads_cpf = results.bus(:,PD);
             % Solve the maximum loadability limit without considering

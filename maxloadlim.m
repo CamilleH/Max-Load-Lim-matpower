@@ -13,6 +13,19 @@ function results = maxloadlim(mpc,dir_mll,varargin)
 
 define_constants;
 
+%% Checking the options, if any
+input_checker = inputParser;
+
+default_verbose = 0;
+verbose_levels = [0;1];
+check_verbose = @(x)(isnumeric(x) && isscalar(x) && any(x == verbose_levels));
+addParameter(input_checker,'verbose',default_verbose,check_verbose);
+
+input_checker.KeepUnmatched = true;
+parse(input_checker,varargin{:});
+
+options = input_checker.Results;
+
 %% Prepare the matpower case for the maximum loadability limit problem
 mpc_vl = prepare_maxloadlim(mpc,dir_mll,varargin{:});
 
@@ -27,5 +40,7 @@ results = runopf(mpc_vl,mpopt);
 results = postproc_maxloadlim(results,dir_mll);
 
 %% Printing
-print_maxloadlim(results);
+if options.verbose
+    print_maxloadlim(results);
+end
 end
