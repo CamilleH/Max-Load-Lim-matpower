@@ -1,0 +1,68 @@
+\documentclass[11pt]{article}
+\usepackage{fontspec}
+\usepackage{fullpage}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\title{Complementarity constraints for maximizing loadability limits}
+\date{\today}
+\author{Camille Hamon}
+\begin{document}
+\maketitle
+
+\section{Literature}
+Relevant literature in the Zotero folder.
+
+\section{Results}
+
+\subsection{IEEE 9 bus system}
+\label{sec:ieee 9 bus system}
+
+In the IEEE 9 bus system, increasing only load at bus 7 gives a SLL due to generator 2. Without complementarity constraints, the results are shown in Table \ref{tab:res_vlim_nonenforced}. It can be seen that although generator 3 has not reached its reactive power limit, the voltage at its bus is slightly below 1. The stability margin is 339.61 MW.
+
+Next, we set the voltage at bus 3, where generator 3 is connected, to 1. 
+The voltage magnitudes and reactive power generations are as in Table \ref{tab:res_vlim_enforced}. The stability margin is 339.52 MW.
+
+\begin{table}[!h]
+  \centering
+  \begin{tabular}{cccccc}
+\toprule
+      Gen number & Q  & Qlim & V & Vset & Tags \\
+\midrule
+      1   &    305.60  &  9999.00  &  1.0000  &  1.00 &   REF\\
+      2   &    300.00  &   300.00  &  0.9993  &  1.00 &   SLL\\
+      3   &    256.26  &   300.00  &  0.9999  &  1.00 & \\
+\bottomrule
+  \end{tabular}
+  \caption{Results with $V_{lim,3} \leq 1$ as a constraint.}
+  \label{tab:res_vlim_nonenforced}
+\end{table}
+
+\begin{table}[!h]
+  \centering
+  \begin{tabular}{cccccc}
+\toprule
+      Gen number & Q  & Qlim & V & Vset & Tags \\
+\midrule
+      1 &      305.17 &   9999.00 &   1.0000  &  1.00 &   REF \\
+      2 &      299.98 &    300.00 &   0.9999  &  1.00 &   SLL \\
+      3 &      255.68 &    300.00 &   1.0000  &  1.00 & \\
+\bottomrule
+  \end{tabular}
+  \caption{Results with $V_{lim,3} = 1$ as a constraint.}
+  \label{tab:res_vlim_enforced}
+\end{table}
+
+\subsection{Questions}
+\label{sec:questions}
+
+\begin{itemize}
+\item How come the shadow price of the voltage constraints is not zero, even if the voltage is not exactly equal to its limit? (For example, in Table \ref{tab:res_vlim_nonenforced}, all shadow prices for voltage magnitudes at generator buses are nonzero, even though, for example, the voltage magnitude for generator 2 is 0.0007 away from its limit). 
+\end{itemize}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-engine: luatex
+%%% TeX-master: t
+%%% End:

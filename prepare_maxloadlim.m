@@ -38,6 +38,11 @@ default_qlim = 1;
 check_qlim = @(x)(isnumeric(x) && isscalar(x));
 addParameter(input_checker,'use_qlim',default_qlim,check_qlim);
 
+% Enfore V-lims
+default_vlim = [];
+check_vlim = @(x)(isnumeric(x) && all(floor(x) == ceil(x))); % expects array of integer values (bus numbers)
+addParameter(input_checker,'Vlims_bus_nb',default_vlim,check_vlim);
+
 % Parse
 input_checker.KeepUnmatched = true;
 parse(input_checker,varargin{:});
@@ -91,6 +96,11 @@ if ~options.use_qlim
     mpc_vl.gen(idx_gen_pv,QMAX) = 9999;
     mpc_vl.bus(pv,VMAX) = mpc_vl.gen(idx_gen_pv,VG);
     mpc_vl.bus(pv,VMIN) = mpc_vl.gen(idx_gen_pv,VG);
+end
+if ~isempty(options.Vlims_bus_nb)
+    idx_gen_vlim = find(ismember(mpc_vl.gen(:,GEN_BUS),options.Vlims_bus_nb));
+    mpc_vl.bus(options.Vlims_bus_nb,VMAX) = mpc_vl.gen(idx_gen_vlim,VG);
+    mpc_vl.bus(options.Vlims_bus_nb,VMIN) = mpc_vl.gen(idx_gen_vlim,VG);
 end
 
 % Build the constraint for enforcing the direction of load increase
