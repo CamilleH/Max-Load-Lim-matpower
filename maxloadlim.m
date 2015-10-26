@@ -33,6 +33,8 @@ mpc_vl = prepare_maxloadlim(mpc,dir_mll,varargin{:});
 % Turning off the printing and initializing from the base case
 mpopt = mpoption('verbose',0,'opf.init_from_mpc',1);
 mpopt = mpoption(mpopt,'out.all',0);
+% Decreasing the threshold for the relative complementarity constraints
+mpopt = mpoption(mpopt,'mips.comptol',1e-8);
 % Execute opf
 results = runopf(mpc_vl,mpopt);
 

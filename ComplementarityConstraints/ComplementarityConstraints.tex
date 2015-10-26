@@ -1,8 +1,13 @@
 \documentclass[11pt]{article}
 \usepackage{fontspec}
 \usepackage{fullpage}
+\usepackage{listings}
 \usepackage{booktabs}
+\usepackage{amsmath}
 \usepackage{hyperref}
+
+\newcommand\norm[1]{\left\lVert#1\right\rVert}
+
 \title{Complementarity constraints for maximizing loadability limits}
 \date{\today}
 \author{Camille Hamon}
@@ -52,12 +57,80 @@ The voltage magnitudes and reactive power generations are as in Table \ref{tab:r
   \label{tab:res_vlim_enforced}
 \end{table}
 
-\subsection{Questions}
+\section{Questions}
 \label{sec:questions}
 
-\begin{itemize}
-\item How come the shadow price of the voltage constraints is not zero, even if the voltage is not exactly equal to its limit? (For example, in Table \ref{tab:res_vlim_nonenforced}, all shadow prices for voltage magnitudes at generator buses are nonzero, even though, for example, the voltage magnitude for generator 2 is 0.0007 away from its limit). 
-\end{itemize}
+\subsection{Shadow prices in Matpower}
+\label{sec:shad-pric-matp}
+
+\textbf{Question:} How come the shadow price of the voltage constraints is not zero, even if the voltage is not exactly equal to its limit? (For example, in Table \ref{tab:res_vlim_nonenforced}, all shadow prices for voltage magnitudes at generator buses are nonzero, even though, for example, the voltage magnitude for generator 2 is 0.0007 away from its limit). 
+
+The answer to that lies in the handling of shadow prices. When the MIPS converges to a solution, the parameters in the variable $\mu$ are the shadow prices. Matpower sets all shadow prices for non-binding constraints to zero \textbf{if} these shadow prices are smaller than a certain threshold. The explicit condition in the code is 
+
+\begin{lstlisting}[language=Matlab]
+  mu(h < -opt.feastol & mu < mu_threshold) = 0;
+\end{lstlisting}
+
+The first condition in the code above identifies the non-binding constraints and the second identifies the ones for which the $\mu$ is small enough.
+Note that the $\mu$ are the Lagrange multiplier. 
+Note also that the MIPS is based on H. Wang et al., ``On Computational Issues of Market-Based Optimal Power Flow,'' IEEE Transactions on Power Systems 22, no. 3 (August 2007): 1185-93, doi:10.1109/TPWRS.2007.901301.
+
+When using MIPS (interior point), the derivative of the lagrangian including the barrier term with respect to slack variables gives
+\begin{align}\label{eq:muz}
+  \mu_i z_i = \gamma, \; \forall i
+\end{align}
+where $\mu_i$ is the Lagrangian multiplier corresponding to the $i$-th constraint, $z_i$ the slack variable and $\gamma$ the perturbation parameter of the interior point method. 
+Note that during the course of MIPS, $\gamma$ converges to zero so that when MIPS converges, all products $\mu_i z_i$ will be equal to zero. 
+Due to numerical tolerances, in practice, all products will be very small, but not equal to zero which implies that the Lagrangian multiplier can be nonzero even if the constraint is nonbinding, i.e. that we have both $\mu_i > \epsilon$ and $z_i > \epsilon$ is $\epsilon^2 \leq \gamma^{*}$, where $\gamma^{*}$ is the value of the perturbation parameter after convergence of MIPS.
+
+Note that since MIPS is based on Newton-Raphson iterations, all first-order KKT conditions must be satisfied up to a certain tolerance for the solver to conclude on convergence. 
+In particular, equation \ref{eq:muz} must hold within the given tolerance.
+In Matpower, the corresponding check is given by computing the following:
+\begin{lstlisting}[language=Matlab]
+compcond = (z' * mu) / (1 + norm(x, Inf));
+\end{lstlisting}
+This is the so-called complementarity condition.
+The corresponding threshold is $\epsilon_{c-c} = 10^{-6}$.
+Therefore, the stopping criterion related to the complementarity condition is
+\begin{align}
+  \label{eq:comp-cond}
+  \frac{z^T \mu}{1+\norm{x}_\infty} \leq \epsilon_{c-c}.
+\end{align}
+Note that this measures the relative complementarity condition.
+
+\subsubsection{An Example}
+\label{sec:an-example}
+
+When using MIPS to find the maximum loadability point in the IEEE 9 bus system, here are the values corresponding to the upper bounds $V_{m,2} \leq V_{g,2}$ and $V_{m,3} \leq V_{g,3}$ where the $V_g$ are the voltage set points of the generators 2 and 3 (they correspond to the 20th and 21st elements in $z$ and $\mu$):
+\begin{align}
+  \label{eq:2}
+  z_{20} &= 7.2167 \cdot 10^{-4} \\
+  z_{21} &= 8.0295 \cdot 10^{-4} \\
+  \mu_{20} &= 1.8884 \cdot 10^{-4} \\
+  \mu_{21} &= 2.6897 \cdot 10^{-4}
+\end{align}
+
+The last iteration of MIPS fulfilled the complementarity condition \eqref{eq:comp-cond} (along with the other conditions) since 
+\begin{align}
+  \label{eq:3}
+  \epsilon_{c-c} &= 10^{-6} \text{ default in Matpower} \\
+  1+\norm{x}_\infty &= 5.6761 \\
+  z^T \mu &= 2.7152 \cdot 10^{-6} \\
+  \frac{z^T \mu}{1+\norm{x}_\infty} &= 4.7835 \cdot 10^{-7} \leq \epsilon_{c-c}
+\end{align}
+
+Next, the non-binding variables are checked. 
+The slack variables $z$ measures the deviation from the limits. 
+A constraint is non-binding if its slack variable is larger than a tolerance, set to $5 \cdot 10^{-6}$ in Matpower.
+Since both $z_{20}$ and $z_{21}$ are above the tolerance, they are not binding. 
+However, the shadow prices (or Lagrangian multipliers) $\mu$ are set to zero only for non-binding constraints whose shadow price is small enough, under a certain threshold, set to $10^{-5}$ in Matpower. 
+Since both $\mu_{20}$ and $\mu_{21}$ are larger than this threshold, they are not set to zero.
+
+Therefore, the two voltage magnitude constraints are non-binding but they have nonzero shadow prices.
+This is due to the way that the relative complementarity constraint is checked, on one hand, and the non-binding constraints are identified, on the other hand.
+
+\textbf{Fix}:
+To fix this, we set the threshold for the relative complementarity constraint to a lower value, $10^{-8}$.
 
 \end{document}
 

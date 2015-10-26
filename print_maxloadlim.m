@@ -10,8 +10,8 @@ fprintf('=======================================\n');
 fprintf('The stability margin is %.2f MW\n',results.stab_marg*results.baseMVA);
 fprintf('The type of bifurcation is %s (%s).\n',...
     results.bif.full_name,results.bif.short_name);
-if strcmp(results.bif.short_name,'SLL')
-    fprintf('Generator responsible for SLL: Gen %d connected at bus %d\n',...
+if strcmp(results.bif.short_name,'LIB')
+    fprintf('Generator responsible for LIB: Gen %d connected at bus %d\n',...
         results.bif.gen_sll,results.gen(results.bif.gen_sll,GEN_BUS));
 end
 fprintf('------------------------------------\n');
@@ -36,8 +36,8 @@ for i = 1:size(results.gen,1)
     if results.bus(results.gen(i,GEN_BUS),BUS_TYPE) == REF
         fprintf('    REF');
     end
-    if strcmp(results.bif.short_name,'SLL') && results.bif.gen_sll == i
-        fprintf('    SLL');
+    if strcmp(results.bif.short_name,'LIB') && results.bif.gen_sll == i
+        fprintf('    LIB');
     end
     fprintf('\n');
 end
