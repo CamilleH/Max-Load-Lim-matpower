@@ -51,6 +51,7 @@ options = input_checker.Results;
 %% Preparation of the case mpc_vl
 % Convert all loads to dispatchable
 mpc_vl = load2disp(mpc);
+n_gen = size(mpc.gen,1);
 
 % Extract the part of dir_mll corresponding to nonzero loads
 dir_mll = dir_mll(mpc.bus(:, PD) > 0);
@@ -64,21 +65,28 @@ mpc_vl.dir_mll = dir_mll;
 % Adjust the Pmin of dispatchable loads to make them negative enough so
 % that the max load lim can be found
 idx_vl = isload(mpc_vl.gen);
-tanphi_vl = mpc_vl.gen(idx_vl,QG)./mpc_vl.gen(idx_vl,PG);
 mpc_vl.gen(idx_vl,PMIN) = 100*mpc_vl.gen(idx_vl,PMIN);
-% Adjust Qmin so that Qmin/Pmin is the power factor of the load
-mpc_vl.gen(idx_vl,QMIN) = mpc_vl.gen(idx_vl,PMIN).*tanphi_vl;
+% Adjust Qmin so that Qmin/Pmin is the power factor of the load, if
+% inductive, and change Qmax if the load is capacitive
+idx_vl_inductive = idx_vl & mpc_vl.gen(:,QMAX) == 0;
+idx_vl_capacitive = idx_vl & mpc_vl.gen(:,QMIN) == 0;
+tanphi_vl_ind = mpc_vl.gen(idx_vl_inductive,QG)./mpc_vl.gen(idx_vl_inductive,PG);
+tanphi_vl_cap = mpc_vl.gen(idx_vl_capacitive,QG)./mpc_vl.gen(idx_vl_capacitive,PG);
+mpc_vl.gen(idx_vl_inductive,QMIN) = mpc_vl.gen(idx_vl_inductive,PMIN).*tanphi_vl_ind;
+mpc_vl.gen(idx_vl_capacitive,QMAX) = mpc_vl.gen(idx_vl_capacitive,PMIN).*tanphi_vl_cap;
 % Make the cost zero
 mpc_vl.gencost(:,COST:end) = 0;
 % Make the generators not dispatchable
 [ref, pv, pq] = bustypes(mpc_vl.bus, mpc_vl.gen);
-idx_gen_pv = find(ismember(mpc_vl.gen(:,GEN_BUS),pv));
+% Note, we look only for the real PV buses, i.e. we do not consider the
+% dispatchable loads in this search. Hence the search over 1:n_gen
+idx_gen_pv = find(ismember(mpc_vl.gen(1:n_gen,GEN_BUS),pv));
 mpc_vl.gen(idx_gen_pv,PMIN) = mpc_vl.gen(idx_gen_pv,PG);
 mpc_vl.gen(idx_gen_pv,PMAX) = mpc_vl.gen(idx_gen_pv,PG);
 % Raise the flow limits so that they are not binding
 mpc_vl.branch(:,RATE_A) = 9999;
 % Raise the slack bus limits so that they are not binding
-idx_gen_slack = mpc_vl.gen(:,GEN_BUS) == ref;
+idx_gen_slack = mpc_vl.gen(1:n_gen,GEN_BUS) == ref;
 mpc_vl.gen(idx_gen_slack,[QMAX,PMAX]) = 9999;
 % Change the voltage constraints of the PQ buses so that they are not 
 % binding

@@ -33,8 +33,23 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
         end
     end
     
-    methods(Test)        
-        function testAgainstCPF(testCase,idx_dir)
+    methods(Test)     
+        function testAgainstCPF_case39(testCase)
+            define_constants;
+            mpc = loadcase('case39');
+            nbus = size(mpc.bus,1);
+            dirCPF = zeros(nbus,1);
+            idx_nonzero_loads = mpc.bus(:,PD) > 0;
+            %dirCPF(idx_nonzero_loads) = 1;
+            dirCPF(8) = 1;
+            results_mll = maxloadlim(mpc,dirCPF,'verbose',1);
+            max_loads_mll = results_mll.bus(:,PD);
+            results_cpf = ch_runCPF('case39','',0,dirCPF(idx_nonzero_loads));
+            max_loads_cpf = results_cpf.bus(:,PD)*mpc.baseMVA;           
+            testCase.verifyEqual(max_loads_cpf,max_loads_mll,'AbsTol',1);
+        end
+        
+        function testAgainstCPF_case9(testCase,idx_dir)
             define_constants;
             % Loading the case
             mpc = loadcase('case9');
@@ -50,7 +65,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             testCase.verifyEqual(max_loads_cpf,max_loads_mll,'AbsTol',1);
         end
         
-        function testAgainstMatpowerCPF(testCase,idx_dir)
+        function testAgainstMatpowerCPF_case9(testCase,idx_dir)
             define_constants;
             % Loading the case
             mpc = loadcase('case9');
@@ -75,7 +90,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             testCase.verifyEqual(max_loads_mll,max_loads_cpf,'AbsTol',1);
         end
         
-        function testAgainstTheoretical(testCase)
+        function testAgainstTheoretical_case2(testCase)
             define_constants;
             % Loading the case
             mpc = loadcase('case2');
