@@ -1,4 +1,4 @@
-function print_maxloadlim(results)
+function print_maxloadlim(mpc,results)
 define_constants;
 
 % Print some global information about the parameters and results of the
@@ -23,6 +23,9 @@ for i = 1:size(results.bus,1)
 end
 
 % Print some global information about the generators and their limits
+% First we extract the original voltage set points of the generators
+gen_v_set = mpc.gen(:,VG);
+
 fprintf('\n');
 fprintf('=============================================================\n');
 fprintf('Reactive power production and voltages at the generators\n');
@@ -30,9 +33,9 @@ fprintf('=============================================================\n');
 fprintf('   Bus nb      Qgen       Qlim        Vm      Vref\n');
 fprintf('  --------    -------    ------      -----    -----\n');
 for i = 1:size(results.gen,1)
-    fprintf('   %4d       %6.2f    %7.2f    %5.4f   %5.2f',...
+    fprintf('   %4d       %7.2f    %7.2f    %5.4f   %5.4f',...
         results.gen(i,GEN_BUS),results.gen(i,QG),results.gen(i,QMAX),...
-        results.bus(results.gen(i,GEN_BUS),VM),results.gen(i,VG));
+        results.bus(results.gen(i,GEN_BUS),VM),gen_v_set(i));
     if results.bus(results.gen(i,GEN_BUS),BUS_TYPE) == REF
         fprintf('    REF');
     end

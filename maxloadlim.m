@@ -43,6 +43,6 @@ results = postproc_maxloadlim(results,dir_mll);
 
 %% Printing
 if options.verbose
-    print_maxloadlim(results);
+    print_maxloadlim(mpc,results);
 end
 end
