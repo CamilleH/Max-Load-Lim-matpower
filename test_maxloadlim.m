@@ -9,12 +9,14 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             0 0 0 0 1 0 1 0 1;
             0 0 0 0 1 0 1 0 0;
             0 0 0 0 1 0 0 0 1;
-            0 0 0 0 0 0 1 0 1]');
+            0 0 0 0 0 0 1 0 1]',...
+            'case39',[eye(39);ones(1,39)]');
         % For the case 2 the theoretical result is P = E^2/(2*X)
         max_load_lims = struct('case2',5);
     end
     properties(TestParameter)
-        idx_dir = num2cell(1:7);
+        idx_dir_ieee9 = num2cell(1:7);
+        idx_dir_ieee39 = num2cell(1:40);
     end
     methods(TestClassSetup)
         function setuptests(testcase)
@@ -34,27 +36,35 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
     end
     
     methods(Test)     
-        function testAgainstCPF_case39(testCase)
+        function testAgainstCPF_case39(testCase,idx_dir_ieee39)
             define_constants;
             mpc = loadcase('case39');
-            nbus = size(mpc.bus,1);
-            dirCPF = zeros(nbus,1);
             idx_nonzero_loads = mpc.bus(:,PD) > 0;
+%             nbus = size(mpc.bus,1);
+%             dirCPF = zeros(nbus,1);
+%             dirCPF(8) = 1;
             %dirCPF(idx_nonzero_loads) = 1;
-            dirCPF(8) = 1;
-            results_mll = maxloadlim(mpc,dirCPF,'verbose',1);
-            max_loads_mll = results_mll.bus(:,PD);
-            results_cpf = ch_runCPF('case39','',0,dirCPF(idx_nonzero_loads));
-            max_loads_cpf = results_cpf.bus(:,PD)*mpc.baseMVA;           
-            testCase.verifyEqual(max_loads_cpf,max_loads_mll,'AbsTol',1);
+            dir_all = testCase.directions.('case39');
+            dirCPF = dir_all(:,idx_dir_ieee39);
+            dirCPF2 = dirCPF(idx_nonzero_loads);
+            if sum(dirCPF2) == 0
+                % case of load increase in non-zero load
+                testCase.verifyEqual(1,1);
+            else
+                results_mll = maxloadlim(mpc,dirCPF,'verbose',1);
+                max_loads_mll = results_mll.bus(:,PD);
+                results_cpf = ch_runCPF('case39','',0,dirCPF2);
+                max_loads_cpf = results_cpf.bus(:,PD)*mpc.baseMVA;
+                testCase.verifyEqual(max_loads_cpf,max_loads_mll,'AbsTol',1);
+            end
         end
         
-        function testAgainstCPF_case9(testCase,idx_dir)
+        function testAgainstCPF_case9(testCase,idx_dir_ieee9)
             define_constants;
             % Loading the case
             mpc = loadcase('case9');
             dir_all = testCase.directions.('case9');
-            dir = dir_all(:,idx_dir);
+            dir = dir_all(:,idx_dir_ieee9);
             results_mll = maxloadlim(mpc,dir,'verbose',1);%,'Vlims_bus_nb',3);
             max_loads_mll = results_mll.bus(:,PD);
             % Remember to set chooseStartPoint to 0 in ch_runCPF
@@ -65,12 +75,12 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             testCase.verifyEqual(max_loads_cpf,max_loads_mll,'AbsTol',1);
         end
         
-        function testAgainstMatpowerCPF_case9(testCase,idx_dir)
+        function testAgainstMatpowerCPF_case9(testCase,idx_dir_ieee9)
             define_constants;
             % Loading the case
             mpc = loadcase('case9');
             dir_all = testCase.directions.('case9');
-            dir = dir_all(:,idx_dir);
+            dir = dir_all(:,idx_dir_ieee9);
             % Preparing the target case for Matpower CPF
             mpc_target = mpc;
             nonzero_loads = mpc_target.bus(:,PD) ~= 0;
