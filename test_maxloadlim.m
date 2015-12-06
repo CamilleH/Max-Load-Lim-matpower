@@ -46,6 +46,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             %dirCPF(idx_nonzero_loads) = 1;
             dir_all = testCase.directions.('case39');
             dirCPF = dir_all(:,idx_dir_ieee39);
+            dirCPF(~idx_nonzero_loads)=0;
             dirCPF2 = dirCPF(idx_nonzero_loads);
             if sum(dirCPF2) == 0
                 % case of load increase in non-zero load
