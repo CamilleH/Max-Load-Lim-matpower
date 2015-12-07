@@ -1,8 +1,11 @@
 function results = postproc_maxloadlim(results,dir_mll)
 % POSTPROC_MAXLOADLIM Performs some post processing on the results returned
 % by the ACOPF run in MATPOWER.
-%   RESULTS = POSTPROC_MAXLOADLIM(RESULTS) transforms the dispatchable
-%   loads back to normal loads and return the updated RESULTS.
+%   RESULTS = POSTPROC_MAXLOADLIM(RESULTS,DIR_MLL) transforms the dispatchable
+%   loads back to normal loads and parse the results in the struct RESULTS
+%   to provide contextual information on the maximum loadability point
+%   found in the direction of load increase defined by DIR_MLL. It returns
+%   the updated struct RESULTS.
 
 define_constants;
 

@@ -40,10 +40,6 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             define_constants;
             mpc = loadcase('case39');
             idx_nonzero_loads = mpc.bus(:,PD) > 0;
-%             nbus = size(mpc.bus,1);
-%             dirCPF = zeros(nbus,1);
-%             dirCPF(8) = 1;
-            %dirCPF(idx_nonzero_loads) = 1;
             dir_all = testCase.directions.('case39');
             dirCPF = dir_all(:,idx_dir_ieee39);
             dirCPF(~idx_nonzero_loads)=0;
@@ -52,7 +48,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
                 % case of load increase in non-zero load
                 testCase.verifyEqual(1,1);
             else
-                results_mll = maxloadlim(mpc,dirCPF);
+                results_mll = maxloadlim(mpc,dirCPF,'verbose',1);
                 max_loads_mll = results_mll.bus(:,PD);
                 results_cpf = ch_runCPF('case39','',0,dirCPF2);
                 max_loads_cpf = results_cpf.bus(:,PD)*mpc.baseMVA;
@@ -98,32 +94,40 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             % Extract the maximum loads
             max_loads_mll = results_mll.bus(:,PD);
             % We compare with a precision of 0.5MW
-            testCase.verifyEqual(max_loads_mll,max_loads_cpf,'AbsTol',1);
+            testCase.verifyEqual(max_loads_cpf,max_loads_mll,'AbsTol',1);
         end
         
         function testAgainstMatpowerCPF_case39(testCase,idx_dir_ieee39)
             define_constants;
             % Loading the case
-            mpc = loadcase('case9');
-            dir_all = testCase.directions.('case9');
-            dir = dir_all(:,idx_dir_ieee9);
-            % Preparing the target case for Matpower CPF
-            mpc_target = mpc;
-            nonzero_loads = mpc_target.bus(:,PD) ~= 0;
-            Q_P = mpc_target.bus(nonzero_loads,QD)./mpc_target.bus(nonzero_loads,PD);
-            mpc_target.bus(:,PD) = mpc_target.bus(:,PD)+2*dir*mpc_target.baseMVA;
-            mpc_target.bus(nonzero_loads,QD) = Q_P.*mpc_target.bus(nonzero_loads,PD);
-            % Run the CPF with matpower
-            [results,~] = runcpf(mpc,mpc_target,mpoption('out.all',0));
-            % Extract the maximum loads
-            max_loads_cpf = results.bus(:,PD);
-            % Solve the maximum loadability limit without considering
-            % reactive power limits
-            results_mll = maxloadlim(mpc,dir,'use_qlim',0);
-            % Extract the maximum loads
-            max_loads_mll = results_mll.bus(:,PD);
-            % We compare with a precision of 0.5MW
-            testCase.verifyEqual(max_loads_mll,max_loads_cpf,'AbsTol',1);
+            mpc = loadcase('case39');
+            idx_nonzero_loads = mpc.bus(:,PD) > 0;
+            dir_all = testCase.directions.('case39');
+            dir = dir_all(:,idx_dir_ieee39);
+            dir(~idx_nonzero_loads)=0;
+            if sum(dir) == 0
+                % The code does not currently support load increase at
+                % nonzero loads.
+                testCase.verifyEqual(1,1);
+            else
+                % Preparing the target case for Matpower CPF
+                mpc_target = mpc;
+                nonzero_loads = mpc_target.bus(:,PD) ~= 0;
+                Q_P = mpc_target.bus(nonzero_loads,QD)./mpc_target.bus(nonzero_loads,PD);
+                mpc_target.bus(:,PD) = mpc_target.bus(:,PD)+2*dir*mpc_target.baseMVA;
+                mpc_target.bus(nonzero_loads,QD) = Q_P.*mpc_target.bus(nonzero_loads,PD);
+                % Run the CPF with matpower
+                [results,~] = runcpf(mpc,mpc_target,mpoption('out.all',0));
+                % Extract the maximum loads
+                max_loads_cpf = results.bus(:,PD);
+                % Solve the maximum loadability limit without considering
+                % reactive power limits
+                results_mll = maxloadlim(mpc,dir,'use_qlim',0);
+                % Extract the maximum loads
+                max_loads_mll = results_mll.bus(:,PD);
+                % We compare with a precision of 0.5MW
+                testCase.verifyEqual(max_loads_cpf,max_loads_mll,'AbsTol',1);
+            end
         end
         
         function testAgainstTheoretical_case2(testCase)
@@ -136,7 +140,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             idx_nonzero_loads = res_maxloadlim.bus(:,PD) > 0;
             max_loads = res_maxloadlim.bus(idx_nonzero_loads,PD)/res_maxloadlim.baseMVA;
             max_loads_theo = testCase.max_load_lims.('case2');
-            testCase.verifyEqual(max_loads,max_loads_theo,'AbsTol',1);
+            testCase.verifyEqual(max_loads_theo,max_loads,'AbsTol',1);
         end
     end
 end

@@ -1,4 +1,7 @@
 function print_maxloadlim(mpc,results)
+% PRINT_MAXLOADLIM(MPC,RESULTS) prints the results in RESULTS of the 
+% maximum loadability problems defined from the base case MPC.
+
 define_constants;
 
 % Print some global information about the parameters and results of the
@@ -30,11 +33,11 @@ fprintf('\n');
 fprintf('=============================================================\n');
 fprintf('Reactive power production and voltages at the generators\n');
 fprintf('=============================================================\n');
-fprintf('   Bus nb      Qgen       Qlim        Vm      Vref\n');
-fprintf('  --------    -------    ------      -----    -----\n');
+fprintf('   Bus nb      Qgen       Qmin       Qmax        Vm      Vref\n');
+fprintf('  --------    -------    ------     ------      -----    -----\n');
 for i = 1:size(results.gen,1)
-    fprintf('   %4d       %7.2f    %7.2f    %5.4f   %5.4f',...
-        results.gen(i,GEN_BUS),results.gen(i,QG),results.gen(i,QMAX),...
+    fprintf('   %4d       %7.2f    %7.2f    %7.2f    %5.4f   %5.4f',...
+        results.gen(i,GEN_BUS),results.gen(i,QG),results.gen(i,QMIN),results.gen(i,QMAX),...
         results.bus(results.gen(i,GEN_BUS),VM),gen_v_set(i));
     if results.bus(results.gen(i,GEN_BUS),BUS_TYPE) == REF
         fprintf('    REF');

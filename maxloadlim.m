@@ -8,8 +8,19 @@ function results = maxloadlim(mpc,dir_mll,varargin)
 %   direction of load increases must be zero. RESULTS contains the results
 %   from the runopf function, in which dispatchable loads have been
 %   transformed to normal loads.
+%   
+%   RESULTS = MAXLOADLIM(MPC,DIR_MLL,NAME,VALUE) uses the options defined
+%   by the pair NAME,VALUE. The currently supported options are 
+%     * 'verbose': 1 or 0 (Default). If set to 1, a summary of the results
+%     at the maximum loadability limit is printed. 
+%     * 'use_qlim': 1 (Default) or 0. Enforces or not the reactive power
+%     limits of the generators.
+%     * 'Vlims_bus_nb': [] (Default) or array of integers. By default, the
+%     bus voltage limits are not enforced. This option allows for defining
+%     a set of buses at which the voltage limits are enforced.
 %
-%   See also PREPARE_MAXLL, RUNOPF.
+%   See also PREPARE_MAXLOADLIM, POSTPROC_MAXLOADLIM, PRINT_MAXLOADLIM, 
+%   RUNOPF.
 
 define_constants;
 
