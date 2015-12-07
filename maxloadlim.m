@@ -6,8 +6,13 @@ function results = maxloadlim(mpc,dir_mll,varargin)
 %   the direction of load increase DIR_MLL. DIR_MLL defines the directions
 %   of load increases for all buses. For buses with zero loads, the
 %   direction of load increases must be zero. RESULTS contains the results
-%   from the runopf function, in which dispatchable loads have been
-%   transformed to normal loads.
+%   from the runopf MATPOWER function, in which dispatchable loads have 
+%   been transformed to normal loads. It also contains the following 
+%   additional fields:
+%   * dir_mll: the direction of load increase used as input.
+%   * stab_marg: the stability margin to the maximum loadability point from
+%   the base case defined in the input MPC.
+%   * bif: information about the bifurcation at the MLL point.
 %   
 %   RESULTS = MAXLOADLIM(MPC,DIR_MLL,NAME,VALUE) uses the options defined
 %   by the pair NAME,VALUE. The currently supported options are 

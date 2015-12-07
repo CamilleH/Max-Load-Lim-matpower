@@ -17,12 +17,12 @@ if strcmp(results.bif.short_name,'LIB')
     fprintf('Generator responsible for LIB: Gen %d connected at bus %d\n',...
         results.bif.gen_sll,results.gen(results.bif.gen_sll,GEN_BUS));
 end
-fprintf('------------------------------------\n');
-fprintf('   Bus nb    Direction     Load at MLL \n');
-fprintf('   ------    ---------     -----------\n');
+fprintf('\n--------------------------------------------------\n');
+fprintf('   Bus nb    Direction     Load at MLL    Voltages \n');
+fprintf('   ------    ---------     -----------    --------\n');
 for i = 1:size(results.bus,1)
-    fprintf('   %4d      %5d         %8.2f\n',...
-        results.bus(i,BUS_I),results.dir_mll(i),results.bus(i,PD));
+    fprintf('   %4d      %5d         %8.2f         %4.3f\n',...
+        results.bus(i,BUS_I),results.dir_mll(i),results.bus(i,PD),results.bus(i,VM));
 end
 
 % Print some global information about the generators and their limits

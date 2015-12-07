@@ -38,10 +38,10 @@ shadow_price_Vg = shadow_price_Vm(results.gen(:,GEN_BUS));
 idx_bus_sll = shadow_price_Qg & shadow_price_Vg;
 if sum(idx_bus_sll) > 0
     results.bif.short_name = 'LIB';
-    results.bif.full_name = 'Limit-induced bifurcation';
+    results.bif.full_name = 'limit-induced bifurcation';
     results.bif.gen_sll = find(results.gen(:,GEN_BUS) == results.bus(idx_bus_sll,BUS_I));
 else
     results.bif.short_name = 'SNB';
-    results.bif.full_name = 'Saddle-node bifurcation';
+    results.bif.full_name = 'saddle-node bifurcation';
 end
 end
