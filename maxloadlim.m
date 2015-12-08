@@ -5,10 +5,9 @@ function results = maxloadlim(mpc,dir_mll,varargin)
 %   optimization problem looking for the maximum loadability limit in
 %   the direction of load increase DIR_MLL. DIR_MLL defines the directions
 %   of load increases for all buses. For buses with zero loads, the
-%   direction of load increases must be zero. RESULTS contains the results
-%   from the runopf MATPOWER function, in which dispatchable loads have 
-%   been transformed to normal loads. It also contains the following 
-%   additional fields:
+%   direction of load increases must be zero. RESULTS contains the all fields
+%   returned from the runopf MATPOWER function. It also contains the 
+%   following additional fields:
 %   * dir_mll: the direction of load increase used as input.
 %   * stab_marg: the stability margin to the maximum loadability point from
 %   the base case defined in the input MPC.
