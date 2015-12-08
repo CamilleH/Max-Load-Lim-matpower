@@ -47,9 +47,12 @@ mpc_vl = prepare_maxloadlim(mpc,dir_mll,varargin{:});
 %% Run opf
 % Turning off the printing and initializing from the base case
 mpopt = mpoption('verbose',1,'opf.init_from_mpc',1);
-mpopt = mpoption(mpopt,'out.all',0);
+mpopt = mpoption(mpopt,'out.all',-1,'out.lim.all',1,'out.lim.v',1,...
+    'out.lim.line',1,'out.lim.pg',1,'out.lim.qg',1);
 % Decreasing the threshold for the relative complementarity constraints
 mpopt = mpoption(mpopt,'mips.comptol',1e-8);
+% Change solver
+mpopt = mpoption(mpopt,'opf.ac.solver','FMINCON');
 % Execute opf
 results = runopf(mpc_vl,mpopt);
 
