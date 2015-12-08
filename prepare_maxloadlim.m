@@ -66,7 +66,7 @@ mpc_vl.dir_mll = dir_mll;
 % Adjust the Pmin of dispatchable loads to make them negative enough so
 % that the max load lim can be found
 idx_vl = isload(mpc_vl.gen);
-mpc_vl.gen(idx_vl,PMIN) = 500*mpc_vl.gen(idx_vl,PMIN);
+mpc_vl.gen(idx_vl,PMIN) = 300*mpc_vl.gen(idx_vl,PMIN);
 % Adjust Qmin so that Qmin/Pmin is the power factor of the load, if
 % inductive, and change Qmax if the load is capacitive
 idx_vl_inductive = idx_vl & mpc_vl.gen(:,QMAX) == 0;
@@ -85,7 +85,7 @@ idx_gen_pv = find(ismember(mpc_vl.gen(1:n_gen,GEN_BUS),pv));
 mpc_vl.gen(idx_gen_pv,PMIN) = mpc_vl.gen(idx_gen_pv,PG);
 mpc_vl.gen(idx_gen_pv,PMAX) = mpc_vl.gen(idx_gen_pv,PG);
 % Raise the flow limits so that they are not binding
-mpc_vl.branch(:,RATE_A) = 1e5;
+mpc_vl.branch(:,RATE_A) = 9999;%1e5;
 % Raise the slack bus limits so that they are not binding
 idx_gen_slack = mpc_vl.gen(1:n_gen,GEN_BUS) == ref;
 mpc_vl.gen(idx_gen_slack,[QMAX,PMAX]) = 9999;

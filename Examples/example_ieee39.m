@@ -6,7 +6,7 @@ clear,clc;
 % Loading the system and defining parameters
 mpc = loadcase('case39'); % load ieee9
 dir_mll = zeros(39,1); % define direction of load increase
-dir_mll(31) = 1;
+dir_mll(9) = 1;
 
 %% First, run a CPF
 define_constants;

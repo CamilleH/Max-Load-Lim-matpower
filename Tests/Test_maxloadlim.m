@@ -50,7 +50,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             else
                 results_cpf = ch_runCPF('case39','',0,dirCPF2);
                 max_loads_cpf = results_cpf.bus(:,PD)*mpc.baseMVA;
-                results_mll = maxloadlim(mpc,dirCPF,'verbose',1);
+                results_mll = maxloadlim(mpc,dirCPF,'verbose',0);
                 max_loads_mll = results_mll.bus(:,PD);
                 testCase.verifyEqual(max_loads_cpf,max_loads_mll,'AbsTol',1);
             end
@@ -62,7 +62,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             mpc = loadcase('case9');
             dir_all = testCase.directions.('case9');
             dir = dir_all(:,idx_dir_ieee9);
-            results_mll = maxloadlim(mpc,dir,'verbose',1);%,'Vlims_bus_nb',3);
+            results_mll = maxloadlim(mpc,dir,'verbose',0);
             max_loads_mll = results_mll.bus(:,PD);
             % Remember to set chooseStartPoint to 0 in ch_runCPF
             idx_nonzero_loads = mpc.bus(:,PD) > 0;
@@ -105,9 +105,11 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             dir_all = testCase.directions.('case39');
             dir = dir_all(:,idx_dir_ieee39);
             dir(~idx_nonzero_loads)=0;
-            if sum(dir) == 0
+            if sum(dir) == 0 || idx_dir_ieee39 == 31
                 % The code does not currently support load increase at
                 % nonzero loads.
+                % The MATPOWER CPF takes long time for increase at bus 31
+                % which is the slack bus.
                 testCase.verifyEqual(1,1);
             else
                 % Preparing the target case for Matpower CPF
@@ -117,12 +119,12 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
                 mpc_target.bus(:,PD) = mpc_target.bus(:,PD)+2*dir*mpc_target.baseMVA;
                 mpc_target.bus(nonzero_loads,QD) = Q_P.*mpc_target.bus(nonzero_loads,PD);
                 % Run the CPF with matpower
-                [results,~] = runcpf(mpc,mpc_target,mpoption('cpf.plot.level',1,'out.all',-1));
+                [results,~] = runcpf(mpc,mpc_target,mpoption('out.all',0));
                 % Extract the maximum loads
                 max_loads_cpf = results.bus(:,PD);
                 % Solve the maximum loadability limit without considering
                 % reactive power limits
-                results_mll = maxloadlim(mpc,dir,'use_qlim',0,'verbose',1);
+                results_mll = maxloadlim(mpc,dir,'use_qlim',0);
                 % Extract the maximum loads
                 max_loads_mll = results_mll.bus(:,PD);
                 % We compare with a precision of 0.5MW
