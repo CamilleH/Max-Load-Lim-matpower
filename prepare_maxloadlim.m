@@ -87,18 +87,21 @@ mpc_vl.gen(idx_gen_pv,PMAX) = mpc_vl.gen(idx_gen_pv,PG);
 % Raise the flow limits so that they are not binding
 mpc_vl.branch(:,RATE_A) = 9999;%1e5;
 % Raise the slack bus limits so that they are not binding
-idx_gen_slack = mpc_vl.gen(1:n_gen,GEN_BUS) == ref;
+idx_gen_slack = find(mpc_vl.gen(1:n_gen,GEN_BUS) == ref);
 mpc_vl.gen(idx_gen_slack,[QMAX,PMAX]) = 9999;
 % Change the voltage constraints of the PQ buses so that they are not 
 % binding
 mpc_vl.bus(pq,VMIN) = 0.01;
 mpc_vl.bus(pq,VMAX) = 10;
 % Lock the voltages of the slack bus
-mpc_vl.bus(ref,VMAX) = mpc_vl.gen(idx_gen_slack,VG);
-mpc_vl.bus(ref,VMIN) = mpc_vl.gen(idx_gen_slack,VG);
+mpc_vl.bus(ref,VMAX) = mpc_vl.gen(idx_gen_slack(1),VG);
+mpc_vl.bus(ref,VMIN) = mpc_vl.gen(idx_gen_slack(1),VG);
 % Put Vmax = Vset and low Vmin for all pv buses
-mpc_vl.bus(pv,VMAX) = mpc_vl.gen(idx_gen_pv,VG);
-mpc_vl.bus(pv,VMIN) = 0.01;
+for bb = 1:length(pv)
+    idx_gen_at_bb = find(mpc_vl.gen(1:n_gen,GEN_BUS),pv(bb));
+    mpc_vl.bus(pv,VMAX) = mpc_vl.gen(idx_gen_at_bb(1),VG);
+    mpc_vl.bus(pv,VMIN) = 0.01;
+end
 % If we do not consider Qlim, increase Qmax and decrease Qmin 
 % of all generators to arbitrarily large values 
 if ~options.use_qlim
