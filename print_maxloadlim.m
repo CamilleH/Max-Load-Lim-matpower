@@ -42,7 +42,7 @@ for i = 1:size(results.gen,1)
     if results.bus(results.gen(i,GEN_BUS),BUS_TYPE) == REF
         fprintf('    REF');
     end
-    if strcmp(results.bif.short_name,'LIB') && results.bif.gen_sll == i
+    if strcmp(results.bif.short_name,'LIB') && any(results.bif.gen_sll == i)
         fprintf('    LIB');
     end
     fprintf('\n');
