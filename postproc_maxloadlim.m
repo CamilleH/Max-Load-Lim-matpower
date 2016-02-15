@@ -10,11 +10,21 @@ function results = postproc_maxloadlim(results,dir_mll)
 define_constants;
 
 % Transforming the dispatchable gen back to loads
-idx_gen_load_disp = results.gen(:,PG) < 0;
+idx_gen_load_disp = isload(results.gen);
 idx_bus_load_disp = results.gen(idx_gen_load_disp,GEN_BUS);
 results.bus(idx_bus_load_disp ,[PD QD]) = -results.gen(idx_gen_load_disp,[PG QG]);
 results.gen(idx_gen_load_disp,:) = [];
 results.gencost(idx_gen_load_disp,:) = [];
+% Removing the shadow prices corresponding to dispatchable loads
+results.var.mu.u.Qg(idx_gen_load_disp) = [];
+% If all gens at bus have non zero reactive power shadow prices, this bus
+% is PQ
+for bb = 1:size(results.bus,1)
+    gen_list_at_bb = results.gen(:,GEN_BUS) == bb;
+    if all(results.var.mu.u.Qg(gen_list_at_bb)>0)
+        results.bus(bb,BUS_TYPE) = PQ;
+    end
+end
 
 % Create a new field for the stability margin
 results.stab_marg = results.var.val.alpha;
@@ -29,8 +39,6 @@ results.dir_mll = dir_mll;
 % SLL is characterized by having both reactive power limit and voltage
 % limit binding at one generator
 shadow_price_Qg = results.var.mu.u.Qg;
-% Removing the shadow prices corresponding to dispatchable loads
-shadow_price_Qg(idx_gen_load_disp) = []; 
 shadow_price_Vm = results.var.mu.u.Vm;
 % Map the shadow price of bus voltage magnitude to generators
 shadow_price_Vg = shadow_price_Vm(results.gen(:,GEN_BUS));
