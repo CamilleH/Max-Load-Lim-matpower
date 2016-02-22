@@ -42,7 +42,6 @@ shadow_price_Qg = results.var.mu.u.Qg;
 shadow_price_Vm = results.var.mu.u.Vm;
 % Map the shadow price of bus voltage magnitude to generators
 shadow_price_Vg = shadow_price_Vm(results.gen(:,GEN_BUS));
-
 idx_bus_sll = shadow_price_Qg & shadow_price_Vg;
 if sum(idx_bus_sll) > 0
     results.bif.short_name = 'LIB';
@@ -52,4 +51,10 @@ else
     results.bif.short_name = 'SNB';
     results.bif.full_name = 'saddle-node bifurcation';
 end
+% Building the sets of gens that reached their Q lims and of gens that did
+% not
+gen_a = shadow_price_Vm(results.gen(:,GEN_BUS))~= 0;
+gen_b = shadow_price_Qg ~= 0;
+results.bif.gen_a = gen_a;
+results.bif.gen_b = gen_b;
 end
