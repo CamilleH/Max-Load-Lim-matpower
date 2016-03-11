@@ -15,6 +15,35 @@ function mpc_vl = prepare_maxloadlim(mpc,dir_mll,varargin)
 %     a set of buses at which the voltage limits are enforced.
 
 define_constants;
+n_gen = size(mpc.gen,1);
+
+%% Checking the options, if any
+input_checker = inputParser;
+
+% Q-lims
+default_qlim = 1;
+check_qlim = @(x)(isnumeric(x) && isscalar(x));
+addParameter(input_checker,'use_qlim',default_qlim,check_qlim);
+
+% Enfore V-lims
+default_vlim = [];
+check_vlim = @(x)(isnumeric(x) && all(floor(x) == ceil(x))); % expects array of integer values (bus numbers)
+addParameter(input_checker,'Vlims_bus_nb',default_vlim,check_vlim);
+
+% Direction of change for generators
+default_dir_var_gen = [];
+check_dir_var_gen = @(x)(isnumeric(x) && iscolumn(x));
+addParameter(input_checker,'dir_var_gen',default_dir_var_gen,check_dir_var_gen);
+
+% Generator numbers of the variable generators;
+default_idx_var_gen = [];
+check_idx_var_gen = @(x)(isnumeric(x) && iscolumn(x));
+addParameter(input_checker,'idx_var_gen',default_idx_var_gen,check_idx_var_gen);
+
+% Parse
+input_checker.KeepUnmatched = true;
+parse(input_checker,varargin{:});
+options = input_checker.Results;
 
 %% CHECKS
 % Check whether the number of directions of load increases is equal to the
@@ -31,28 +60,23 @@ if sum(dir_mll(idx_zero_loads))>0
     error('Directions of load increases cannot be defined for zero loads.');
 end
 
-%% Checking the options, if any
-input_checker = inputParser;
+% Check whether the number of variable generators is equal to the number of
+% elements in the direction of change of generators
+if size(options.idx_var_gen,1) ~= size(options.dir_var_gen,1)
+    error('The number of variable generators does not match the direction vector.');
+end
 
-% Q-lims
-default_qlim = 1;
-check_qlim = @(x)(isnumeric(x) && isscalar(x));
-addParameter(input_checker,'use_qlim',default_qlim,check_qlim);
-
-% Enfore V-lims
-default_vlim = [];
-check_vlim = @(x)(isnumeric(x) && all(floor(x) == ceil(x))); % expects array of integer values (bus numbers)
-addParameter(input_checker,'Vlims_bus_nb',default_vlim,check_vlim);
-
-% Parse
-input_checker.KeepUnmatched = true;
-parse(input_checker,varargin{:});
-options = input_checker.Results;
+% Make sure that the slack bus is not included among the variable
+% generators
+[ref_init, ~] = bustypes(mpc.bus, mpc.gen);
+idx_gen_slack = find(mpc.gen(1:n_gen,GEN_BUS) == ref_init);
+if sum(ismember(options.idx_var_gen,idx_gen_slack)) ~= 0
+    error('The direction vector cannot include changes at the slack bus');
+end
 
 %% Preparation of the case mpc_vl
 % Convert all loads to dispatchable
 mpc_vl = load2disp(mpc);
-n_gen = size(mpc.gen,1);
 
 % Extract the part of dir_mll corresponding to nonzero loads
 dir_mll = dir_mll(mpc.bus(:, PD) > 0);
@@ -62,6 +86,10 @@ dir_mll = dir_mll/norm(dir_mll);
 
 % Add a field to mpc_vl for the load increase
 mpc_vl.dir_mll = dir_mll;
+
+% Add a field for the generators
+mpc_vl.dir_var_gen = options.dir_var_gen;
+mpc_vl.idx_var_gen = options.idx_var_gen;
 
 % Adjust the Pmin of dispatchable loads to make them negative enough so
 % that the max load lim can be found
@@ -77,13 +105,14 @@ mpc_vl.gen(idx_vl_inductive,QMIN) = mpc_vl.gen(idx_vl_inductive,PMIN).*tanphi_vl
 mpc_vl.gen(idx_vl_capacitive,QMAX) = mpc_vl.gen(idx_vl_capacitive,PMIN).*tanphi_vl_cap;
 % Make the cost zero
 mpc_vl.gencost(:,COST:end) = 0;
-% Make the generators not dispatchable
-[ref, pv, pq] = bustypes(mpc_vl.bus, mpc_vl.gen);
+% Make the non variable generators not dispatchable
 % Note, we look only for the real PV buses, i.e. we do not consider the
 % dispatchable loads in this search. Hence the search over 1:n_gen
+[ref, pv, pq] = bustypes(mpc_vl.bus, mpc_vl.gen);
 idx_gen_pv = find(ismember(mpc_vl.gen(1:n_gen,GEN_BUS),pv));
-mpc_vl.gen(idx_gen_pv,PMIN) = mpc_vl.gen(idx_gen_pv,PG);
-mpc_vl.gen(idx_gen_pv,PMAX) = mpc_vl.gen(idx_gen_pv,PG);
+idx_non_var_pv = setdiff(idx_gen_pv,options.idx_var_gen);
+mpc_vl.gen(idx_gen_pv,PMIN) = mpc_vl.gen(idx_non_var_pv,PG);
+mpc_vl.gen(idx_gen_pv,PMAX) = mpc_vl.gen(idx_non_var_pv,PG);
 % Raise the flow limits so that they are not binding
 mpc_vl.branch(:,RATE_A) = 9999;%1e5;
 % Raise the slack bus limits so that they are not binding
@@ -119,6 +148,8 @@ if ~isempty(options.Vlims_bus_nb)
     mpc_vl.bus(options.Vlims_bus_nb,VMIN) = mpc_vl.gen(idx_gen_vlim,VG);
 end
 
+% Convert external to internal indexing
+mpc_vl = add_userfcn(mpc_vl, 'ext2int', @userfcn_direction_mll_ext2int);
 % Build the constraint for enforcing the direction of load increase
 mpc_vl = add_userfcn(mpc_vl, 'formulation', @userfcn_direction_mll_formulation);
 end

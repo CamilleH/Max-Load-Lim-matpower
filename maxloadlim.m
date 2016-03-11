@@ -5,7 +5,7 @@ function results = maxloadlim(mpc,dir_mll,varargin)
 %   optimization problem looking for the maximum loadability limit in
 %   the direction of load increase DIR_MLL. DIR_MLL defines the directions
 %   of load increases for all buses. For buses with zero loads, the
-%   direction of load increases must be zero. RESULTS contains the all fields
+%   direction of load increases must be zero. RESULTS contains all fields
 %   returned from the runopf MATPOWER function. It also contains the 
 %   following additional fields:
 %   * dir_mll: the direction of load increase used as input.
@@ -51,7 +51,7 @@ mpopt = mpoption(mpopt,'out.all',0);
 % Decreasing the threshold for the relative complementarity constraints
 mpopt = mpoption(mpopt,'mips.comptol',1e-8);
 % Change solver
-mpopt = mpoption(mpopt);%,'opf.ac.solver','FMINCON');
+mpopt = mpoption(mpopt);
 % Execute opf
 results = runopf(mpc_vl,mpopt);
 
