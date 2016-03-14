@@ -87,9 +87,15 @@ dir_mll = dir_mll/norm(dir_mll);
 % Add a field to mpc_vl for the load increase
 mpc_vl.dir_mll = dir_mll;
 
+% Create a vector with the direction for the variable generators with as
+% many elements as the number of gens + number of sheddable loads
+% (necessary for conversion to internal indexing).
+dir_var_gen_all = sparse(options.idx_var_gen,1,options.dir_var_gen,...
+    size(mpc_vl.gen,1),1);
 % Add a field for the generators
 mpc_vl.dir_var_gen = options.dir_var_gen;
 mpc_vl.idx_var_gen = options.idx_var_gen;
+mpc_vl.dir_var_gen_all = dir_var_gen_all;
 
 % Adjust the Pmin of dispatchable loads to make them negative enough so
 % that the max load lim can be found
