@@ -17,8 +17,6 @@ if length(dir_mll) ~= n_vl
 end
 % Add the amount of load increase alpha with 0 <= alpha <= inf
 om = add_vars(om,'alpha',1,0,0,inf);
-% Add the amount of generator change beta with 0 <= beta <= inf
-om = add_vars(om,'beta',1,0,0,inf);
 
 %% Load increase
 % Add the constraint for enforcing the direction of load increase
@@ -37,6 +35,8 @@ om = add_costs(om,'alpha_cost',struct('Cw',-1),{'alpha'});
 % Add the constraint for enforcing the direction of generation change
 idx_var_gen = find(mpc.dir_var_gen_all);
 if ~isempty(idx_var_gen)
+    % Add the amount of generator change beta with 0 <= beta <= inf
+    om = add_vars(om,'beta',1,0,0,inf);
     Pg0 = mpc.gen(idx_var_gen,PG)/mpc.baseMVA;
     nb_var_gen = length(idx_var_gen);
     idx_A_var_gen_i = 1:nb_var_gen; % Constraint number
@@ -45,13 +45,11 @@ if ~isempty(idx_var_gen)
     A_var_gen = sparse(idx_A_var_gen_i,idx_A_var_gen_j,vals_A_var_gen,nb_var_gen,n_g+n_vl+1);
     om = add_constraints(om,'dir_var_gen',A_var_gen,...
         Pg0,Pg0,{'Pg','beta'});
+    % Add cost of beta to -1 to maximize the generator change in a given
+    % direction
+    om = add_costs(om,'beta_cost',struct('Cw',-1),{'beta'});
+    % Add constraint for beta <= alpha
+    A_beta_alpha = [-1 1];
+    om = add_constraints(om,'beta_alpha',A_beta_alpha,-Inf,0,{'alpha','beta'});
 end
-
-% Add constraint for beta <= alpha
-A_beta_alpha = [-1 1];
-om = add_constraints(om,'beta_alpha',A_beta_alpha,-Inf,0,{'alpha','beta'});
-
-% Add cost of beta to -1 to maximize the generator change in a given
-% direction
-om = add_costs(om,'beta_alpha_cost',struct('Cw',-1),{'beta'});
 end

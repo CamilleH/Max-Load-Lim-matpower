@@ -133,9 +133,9 @@ mpc_vl.bus(ref,VMAX) = mpc_vl.gen(idx_gen_slack(1),VG);
 mpc_vl.bus(ref,VMIN) = mpc_vl.gen(idx_gen_slack(1),VG);
 % Put Vmax = Vset and low Vmin for all pv buses
 for bb = 1:length(pv)
-    idx_gen_at_bb = find(mpc_vl.gen(1:n_gen,GEN_BUS),pv(bb));
-    mpc_vl.bus(pv,VMAX) = mpc_vl.gen(idx_gen_at_bb(1),VG);
-    mpc_vl.bus(pv,VMIN) = 0.01;
+    idx_gen_at_bb = find(ismember(mpc_vl.gen(1:n_gen,GEN_BUS),pv(bb)));
+    mpc_vl.bus(pv(bb),VMAX) = mpc_vl.gen(idx_gen_at_bb(1),VG);
+    mpc_vl.bus(pv(bb),VMIN) = 0.01;
 end
 % If we do not consider Qlim, increase Qmax and decrease Qmin 
 % of all generators to arbitrarily large values 
@@ -143,9 +143,9 @@ if ~options.use_qlim
     mpc_vl.gen(idx_gen_pv,QMAX) = 9999;
     mpc_vl.gen(idx_gen_pv,QMIN) = -9999;
     for bb = 1:length(pv)
-        idx_gen_at_bb = find(mpc_vl.gen(1:n_gen,GEN_BUS),pv(bb));
-        mpc_vl.bus(pv,VMAX) = mpc_vl.gen(idx_gen_at_bb(1),VG);
-        mpc_vl.bus(pv,VMIN) = mpc_vl.gen(idx_gen_at_bb(1),VG);
+        idx_gen_at_bb = find(ismember(mpc_vl.gen(1:n_gen,GEN_BUS),pv(bb)));
+        mpc_vl.bus(pv(bb),VMAX) = mpc_vl.gen(idx_gen_at_bb(1),VG);
+        mpc_vl.bus(pv(bb),VMIN) = mpc_vl.gen(idx_gen_at_bb(1),VG);
     end
 end
 if ~isempty(options.Vlims_bus_nb)
