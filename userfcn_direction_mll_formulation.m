@@ -47,7 +47,7 @@ if ~isempty(idx_var_gen)
         Pg0,Pg0,{'Pg','beta'});
     % Add cost of beta to -1 to maximize the generator change in a given
     % direction
-    om = add_costs(om,'beta_cost',struct('Cw',-1),{'beta'});
+    om = add_costs(om,'beta_cost',struct('Cw',-1e3),{'beta'});
     % Add constraint for beta <= alpha
     A_beta_alpha = [-1 1];
     om = add_constraints(om,'beta_alpha',A_beta_alpha,-Inf,0,{'alpha','beta'});
