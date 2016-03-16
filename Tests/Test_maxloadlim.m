@@ -48,6 +48,18 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
                 % case of load increase in non-zero load
                 testCase.verifyEqual(1,1);
             else
+                switch idx_dir_ieee39
+                    case 9
+                        msg = ['This case fails because the load at bus 9 is capacitive' ...
+                            ' which means that some generators hit their lower reactive limits' ...
+                            ' , a case that is not handled by my CPF'];
+                        fprintf(1,[msg '\n']);
+                    case 31
+                        msg = ['This case fails because the load at bus 31 is so small'...
+                            ' that the CPF procedure reaches the maximum number of iterations'...
+                            ' before reaching the MLL'];
+                        fprintf(1,[msg '\n']);
+                end
                 results_cpf = ch_runCPF('case39','',0,dirCPF2);
                 max_loads_cpf = results_cpf.bus(:,PD)*mpc.baseMVA;
                 results_mll = maxloadlim(mpc,dirCPF,'verbose',0);
