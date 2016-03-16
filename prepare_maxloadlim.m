@@ -81,9 +81,6 @@ mpc_vl = load2disp(mpc);
 % Extract the part of dir_mll corresponding to nonzero loads
 dir_mll = dir_mll(mpc.bus(:, PD) > 0);
 
-% Normalize the direction of load increase
-dir_mll = dir_mll/norm(dir_mll);
-
 % Add a field to mpc_vl for the load increase
 mpc_vl.dir_mll = dir_mll;
 
