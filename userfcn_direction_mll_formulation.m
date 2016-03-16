@@ -39,9 +39,9 @@ if ~isempty(idx_var_gen)
     om = add_vars(om,'beta',1,0,0,inf);
     Pg0 = mpc.gen(idx_var_gen,PG)/mpc.baseMVA;
     nb_var_gen = length(idx_var_gen);
-    idx_A_var_gen_i = 1:nb_var_gen; % Constraint number
-    idx_A_var_gen_j = idx_var_gen; % Generator number (column in constraint matrix)
-    vals_A_var_gen = [ones(nb_var_gen,1);-mpc.dir_var_gen_all];
+    idx_A_var_gen_i = [1:nb_var_gen 1:nb_var_gen]'; % Constraint number
+    idx_A_var_gen_j = [idx_var_gen;(n_g+n_vl+1)*ones(nb_var_gen,1)]; % Generator number and beta column (column in constraint matrix)
+    vals_A_var_gen = [ones(nb_var_gen,1);-nonzeros(mpc.dir_var_gen_all)];
     A_var_gen = sparse(idx_A_var_gen_i,idx_A_var_gen_j,vals_A_var_gen,nb_var_gen,n_g+n_vl+1);
     om = add_constraints(om,'dir_var_gen',A_var_gen,...
         Pg0,Pg0,{'Pg','beta'});

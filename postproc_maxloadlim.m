@@ -26,8 +26,12 @@ for bb = 1:size(results.bus,1)
     end
 end
 
-% Create a new field for the stability margin
+% Create a new field for the stability margin in load increase
 results.stab_marg = results.var.val.alpha;
+% Create a new field for the stability margin in gen change
+if isfield(results.var.val,'beta')
+    results.gen_stab_marg = results.var.val.beta;
+end
 
 % Remove the cost for the printpf function to consider the results as load
 % flow results.

@@ -113,9 +113,11 @@ mpc_vl.gencost(:,COST:end) = 0;
 % dispatchable loads in this search. Hence the search over 1:n_gen
 [ref, pv, pq] = bustypes(mpc_vl.bus, mpc_vl.gen);
 idx_gen_pv = find(ismember(mpc_vl.gen(1:n_gen,GEN_BUS),pv));
-idx_non_var_pv = setdiff(idx_gen_pv,options.idx_var_gen);
-mpc_vl.gen(idx_gen_pv,PMIN) = mpc_vl.gen(idx_non_var_pv,PG);
-mpc_vl.gen(idx_gen_pv,PMAX) = mpc_vl.gen(idx_non_var_pv,PG);
+% Note we filter out non variable generators with nonzero direction of
+% increase from the pv buses
+idx_non_var_pv = setdiff(idx_gen_pv,options.idx_var_gen(options.dir_var_gen~=0));
+mpc_vl.gen(idx_non_var_pv,PMIN) = mpc_vl.gen(idx_non_var_pv,PG);
+mpc_vl.gen(idx_non_var_pv,PMAX) = mpc_vl.gen(idx_non_var_pv,PG);
 % Raise the flow limits so that they are not binding
 mpc_vl.branch(:,RATE_A) = 9999;%1e5;
 % Raise the slack bus limits so that they are not binding
