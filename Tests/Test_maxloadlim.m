@@ -198,5 +198,44 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             mll_without_gen = results_without_gens.bus(:,PD);
             testCase.verifyEqual(mll_with_gen,mll_without_gen,'AbsTol',testCase.threshold_MW);
         end
+        
+        function testVarGen_case39(testCase,idx_dir_ieee39,gen_var_ieee39)
+            define_constants;
+            % Loading the case
+            mpc = loadcase('case39');
+            idx_nonzero_loads = mpc.bus(:,PD) > 0;
+            dir_all = testCase.load_dir.('case39');
+            dir_load = dir_all(:,idx_dir_ieee39);
+            dir_load(~idx_nonzero_loads)=0;
+            dir_var_gen_all = testCase.gen_dir.('case39');
+            % Switching rows 1 and 2 (gens 30 and 31) because row 1
+            % is zero and corresponds to the slack bus which is gen 31
+            dir_var_gen_all([1 2],:) = dir_var_gen_all([2 1],:);
+            dir_var_gen = dir_var_gen_all(:,gen_var_ieee39);
+            idx_var_gen = find(dir_var_gen);
+            dir_var_gen = dir_var_gen(idx_var_gen);
+            % Normalizing with respect to both loads and gens
+            gen_load_dir = [dir_load;dir_var_gen];
+            dir_load = dir_load/norm(gen_load_dir);
+            dir_var_gen = dir_var_gen/norm(dir_var_gen);
+            if sum(dir_load) == 0
+                % case of load increase in non-zero load
+                testCase.verifyEqual(1,1);
+            else
+                % Find MLL in the direction of load and gen increase
+                results_with_gens = maxloadlim(mpc,dir_load,'verbose',0,'idx_var_gen',idx_var_gen,'dir_var_gen',dir_var_gen);
+                % Set gens to their values in previous results and re-run in
+                % load space only
+                mpc2 = mpc;
+                mpc2.gen(:,PG) = results_with_gens.gen(:,PG);
+                dir_load2 = dir_load/norm(dir_load);
+                % Find MLL in the direction of load and gen increase
+                results_without_gens = maxloadlim(mpc2,dir_load2,'verbose',0);
+                % Compare the maximum loads
+                mll_with_gen = results_with_gens.bus(:,PD);
+                mll_without_gen = results_without_gens.bus(:,PD);
+                testCase.verifyEqual(mll_with_gen,mll_without_gen,'RelTol',0.05);
+            end
+        end
     end
 end

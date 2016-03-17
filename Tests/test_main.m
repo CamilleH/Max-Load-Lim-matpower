@@ -7,7 +7,7 @@ res = run(testcase);
 
 if run_specific
     %% Specific tests only
-    testcase = matlab.unittest.TestSuite.fromMethod(?Test_maxloadlim,'testAgainstCPF_case39');%'testAgainstCPF_case39');%'testAgainstMatpowerCPF_case39');
+    testcase = matlab.unittest.TestSuite.fromMethod(?Test_maxloadlim,'testVarGen_case39');%'testAgainstCPF_case39');%'testAgainstMatpowerCPF_case39');
     res_2 = run(testcase);
     %%
 end
