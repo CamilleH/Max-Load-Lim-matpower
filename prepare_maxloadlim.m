@@ -76,7 +76,7 @@ end
 
 %% Preparation of the case mpc_vl
 % Initialise with a power flow with q-lims considered
-mpopt = mpoption('pf.enforce_q_lims', 1,'verbose',0,'out.all',0);
+mpopt = mpoption('pf.enforce_q_lims', options.use_qlim,'verbose',0,'out.all',0);
 mpc = runpf(mpc,mpopt);
 
 % Convert all loads to dispatchable
