@@ -185,7 +185,6 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             % load space only
             mpc2 = mpc;
             mpc2.gen(:,PG) = results_with_gens.gen(:,PG);
-            mpc2 = runpf(mpc2,mpoption('verbose',0,'out.all',0,'pf.enforce_q_lims',1));
             dir_load2 = dir_load/norm(dir_load);
             % Find MLL in the direction of load and gen increase
             results_without_gens = maxloadlim(mpc2,dir_load2,'verbose',0);

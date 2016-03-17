@@ -75,6 +75,10 @@ if sum(ismember(options.idx_var_gen,idx_gen_slack)) ~= 0
 end
 
 %% Preparation of the case mpc_vl
+% Initialise with a power flow with q-lims considered
+mpopt = mpoption('pf.enforce_q_lims', 1,'verbose',0,'out.all',0);
+mpc = runpf(mpc,mpopt);
+
 % Convert all loads to dispatchable
 mpc_vl = load2disp(mpc);
 
