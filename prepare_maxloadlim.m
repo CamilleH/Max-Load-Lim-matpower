@@ -123,6 +123,8 @@ mpc_vl.branch(:,RATE_A) = 9999;%1e5;
 % Raise the slack bus limits so that they are not binding
 idx_gen_slack = find(mpc_vl.gen(1:n_gen,GEN_BUS) == ref);
 mpc_vl.gen(idx_gen_slack,[QMAX,PMAX]) = 9999;
+% Decrease the slack bus limits so that they are not binding
+mpc_vl.gen(idx_gen_slack,[QMIN,PMIN]) = -9999;
 % Change the voltage constraints of the PQ buses so that they are not 
 % binding
 mpc_vl.bus(pq,VMIN) = 0.01;

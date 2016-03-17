@@ -2,7 +2,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
     
     properties
         systems = {'case2','case9'};
-        directions = struct('case2',[0 1],...
+        load_dir = struct('case2',[0 1],...
             'case9',[0 0 0 0 1 0 0 0 0;
             0 0 0 0 0 0 1 0 0;
             0 0 0 0 0 0 0 0 1;
@@ -11,12 +11,18 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             0 0 0 0 1 0 0 0 1;
             0 0 0 0 0 0 1 0 1]',...
             'case39',[eye(39);ones(1,39)]');
+        gen_dir = struct('case9',[0 1 0;
+            0 0 1;
+            0 1 1]',...
+            'case39',[zeros(9,1) eye(9);0 ones(1,9)]');
         % For the case 2 the theoretical result is P = E^2/(2*X)
         max_load_lims = struct('case2',5);
     end
     properties(TestParameter)
         idx_dir_ieee9 = num2cell(1:7);
         idx_dir_ieee39 = num2cell(1:40);
+        gen_var_ieee9 = num2cell(1:3);
+        gen_var_ieee39 = num2cell(1:10);
     end
     methods(TestClassSetup)
         function setuptests(testcase)
@@ -24,7 +30,6 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             % to the nose
             warning off MATLAB:singularMatrix
             warning off MATLAB:nearlySingularMatrix
-            clc;
         end
     end
     
@@ -40,7 +45,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             define_constants;
             mpc = loadcase('case39');
             idx_nonzero_loads = mpc.bus(:,PD) > 0;
-            dir_all = testCase.directions.('case39');
+            dir_all = testCase.load_dir.('case39');
             dirCPF = dir_all(:,idx_dir_ieee39);
             dirCPF(~idx_nonzero_loads)=0;
             dirCPF2 = dirCPF(idx_nonzero_loads);
@@ -65,7 +70,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
                 max_loads_cpf = results_cpf.bus(:,PD)*mpc.baseMVA;
                 results_mll = maxloadlim(mpc,dirCPF,'verbose',0);
                 max_loads_mll = results_mll.bus(:,PD);
-                testCase.verifyEqual(max_loads_cpf,max_loads_mll,'AbsTol',1);
+                testCase.verifyEqual(max_loads_mll,max_loads_cpf,'AbsTol',1);
             end
         end
         
@@ -73,7 +78,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             define_constants;
             % Loading the case
             mpc = loadcase('case9');
-            dir_all = testCase.directions.('case9');
+            dir_all = testCase.load_dir.('case9');
             dir = dir_all(:,idx_dir_ieee9);
             results_mll = maxloadlim(mpc,dir,'verbose',0);
             max_loads_mll = results_mll.bus(:,PD);
@@ -82,14 +87,14 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             dirCPF = dir(idx_nonzero_loads);
             results_cpf = ch_runCPF('case9static','loads568',0,dirCPF);
             max_loads_cpf = results_cpf.bus(:,PD)*mpc.baseMVA;           
-            testCase.verifyEqual(max_loads_cpf,max_loads_mll,'AbsTol',1);
+            testCase.verifyEqual(max_loads_mll,max_loads_cpf,'AbsTol',1);
         end
         
         function testAgainstMatpowerCPF_case9(testCase,idx_dir_ieee9)
             define_constants;
             % Loading the case
             mpc = loadcase('case9');
-            dir_all = testCase.directions.('case9');
+            dir_all = testCase.load_dir.('case9');
             dir = dir_all(:,idx_dir_ieee9);
             % Preparing the target case for Matpower CPF
             mpc_target = mpc;
@@ -107,7 +112,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             % Extract the maximum loads
             max_loads_mll = results_mll.bus(:,PD);
             % We compare with a precision of 0.5MW
-            testCase.verifyEqual(max_loads_cpf,max_loads_mll,'AbsTol',1);
+            testCase.verifyEqual(max_loads_mll,max_loads_cpf,'AbsTol',1);
         end
         
         function testAgainstMatpowerCPF_case39(testCase,idx_dir_ieee39)
@@ -115,7 +120,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             % Loading the case
             mpc = loadcase('case39');
             idx_nonzero_loads = mpc.bus(:,PD) > 0;
-            dir_all = testCase.directions.('case39');
+            dir_all = testCase.load_dir.('case39');
             dir = dir_all(:,idx_dir_ieee39);
             dir(~idx_nonzero_loads)=0;
             if sum(dir) == 0 || idx_dir_ieee39 == 31
@@ -141,7 +146,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
                 % Extract the maximum loads
                 max_loads_mll = results_mll.bus(:,PD);
                 % We compare with a precision of 0.5MW
-                testCase.verifyEqual(max_loads_cpf,max_loads_mll,'AbsTol',1);
+                testCase.verifyEqual(max_loads_mll,max_loads_cpf,'AbsTol',1);
             end
         end
         
@@ -149,13 +154,45 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             define_constants;
             % Loading the case
             mpc = loadcase('case2');
-            dir = testCase.directions.('case2');
+            dir = testCase.load_dir.('case2');
             res_maxloadlim = maxloadlim(mpc,dir);
             % Get nonzero loads
             idx_nonzero_loads = res_maxloadlim.bus(:,PD) > 0;
             max_loads = res_maxloadlim.bus(idx_nonzero_loads,PD)/res_maxloadlim.baseMVA;
             max_loads_theo = testCase.max_load_lims.('case2');
-            testCase.verifyEqual(max_loads_theo,max_loads,'AbsTol',1);
+            testCase.verifyEqual(max_loads,max_loads_theo,'AbsTol',1);
+        end
+        
+        function testVarGen_case9(testCase,idx_dir_ieee9,gen_var_ieee9)
+            define_constants;
+            % Loading the case
+            mpc = loadcase('case9');
+            idx_nonzero_loads = mpc.bus(:,PD) > 0;
+            dir_all = testCase.load_dir.('case9');
+            dir_load = dir_all(:,idx_dir_ieee9);
+            dir_load(~idx_nonzero_loads)=0;
+            dir_var_gen_all = testCase.gen_dir.('case9');
+            dir_var_gen = dir_var_gen_all(:,gen_var_ieee9);
+            idx_var_gen = find(dir_var_gen);
+            dir_var_gen = dir_var_gen(idx_var_gen);
+            % Normalizing with respect to both loads and gens
+            gen_load_dir = [dir_load;dir_var_gen];
+            dir_load = dir_load/norm(gen_load_dir);
+            dir_var_gen = dir_var_gen/norm(dir_var_gen);
+            % Find MLL in the direction of load and gen increase
+            results_with_gens = maxloadlim(mpc,dir_load,'verbose',0,'idx_var_gen',idx_var_gen,'dir_var_gen',dir_var_gen);
+            % Set gens to their values in previous results and re-run in
+            % load space only
+            mpc2 = mpc;
+            mpc2.gen(:,PG) = results_with_gens.gen(:,PG);
+            mpc2 = runpf(mpc2,mpoption('verbose',0,'out.all',0,'pf.enforce_q_lims',1));
+            dir_load2 = dir_load/norm(dir_load);
+            % Find MLL in the direction of load and gen increase
+            results_without_gens = maxloadlim(mpc2,dir_load2,'verbose',0);
+            % Compare the maximum loads
+            mll_with_gen = results_with_gens.bus(:,PD);
+            mll_without_gen = results_without_gens.bus(:,PD);
+            testCase.verifyEqual(mll_with_gen,mll_without_gen,'AbsTol',1);
         end
     end
 end
