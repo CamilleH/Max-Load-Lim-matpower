@@ -33,10 +33,10 @@ fprintf('\n');
 fprintf('=============================================================\n');
 fprintf('Reactive power production and voltages at the generators\n');
 fprintf('=============================================================\n');
-fprintf('   Bus nb      Qgen       Qmin       Qmax        Vm      Vref\n');
-fprintf('  --------    -------    ------     ------      -----    -----\n');
+fprintf(' Bus nb       Qgen        Qmin        Qmax       Vm      Vref\n');
+fprintf('--------    --------    --------    --------    -----    -----\n');
 for i = 1:size(results.gen,1)
-    fprintf('   %4d       %7.2f    %7.2f    %7.2f    %5.4f   %5.4f',...
+    fprintf(' %4d       %8.2f    %8.2f    %8.2f    %4.3f    %4.3f',...
         results.gen(i,GEN_BUS),results.gen(i,QG),results.gen(i,QMIN),results.gen(i,QMAX),...
         results.bus(results.gen(i,GEN_BUS),VM),gen_v_set(i));
     if results.bus(results.gen(i,GEN_BUS),BUS_TYPE) == REF
