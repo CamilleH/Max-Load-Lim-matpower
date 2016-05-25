@@ -323,9 +323,11 @@ The functions in Table \ref{tab:functions} are used to set up and solving the ma
   Name  & Description \\
   \midrule
   \codemat{maxloadlim} & Main function for solving the maximum loadability limit problem.\\
-  \codemat{prepare\_maxll} & Prepares the \matpower case before the AC OPF is run, see Section \ref{sec:adjust-matp-case}.\\
-  \codemat{userfcn\_direction\_mll\_formulation} & Callback function to define new variables, constraints and costs, see Section \ref{sec:defin-vari-alpha}. \\
   \codemat{postproc\_maxloadlim} & Post-processing function that transforms the dispatchable loads back to normal loads.\\
+  \codemat{prepare\_maxloadlim} & Prepares the \matpower case before the AC OPF is run, see Section \ref{sec:adjust-matp-case}.\\
+  \codemat{print\_maxloadlim} & Pretty prints the results from the maximum loadability problem.\\
+  \codemat{userfcn\_direction\_mll\_ext2int} & Converts the vector of generator production changes to internal indexing.\\
+  \codemat{userfcn\_direction\_mll\_formulation} & Callback function to define new variables, constraints and costs, see Section \ref{sec:defin-vari-alpha}. \\
   \bottomrule
   \end{tabular}
   \caption{Functions used for the maximum loadability limit problem}
