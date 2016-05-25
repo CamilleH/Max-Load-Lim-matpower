@@ -14,9 +14,9 @@
 \newcommand*{\field}[1]{\mathbb{#1}}
 \newcommand*{\R}{\field{R}} % real R
 \newcommand*{\codemat}[1]{\texttt{#1}}
-\newcommand*{\matpower}{\textsc{matpower} }
+\newcommand*{\matpower}{{\sc Matpower}}
 
-\title{Computation of maximum loadability limits in \matpower}
+\title{Computation of Maximum loadability limit in \matpower}
 \author{Camille Hamon}
 
 \begin{document}
@@ -139,7 +139,7 @@ Reactive power production and voltages at the generators
   \caption{Results of the search for the MLL in the IEEE 9 bus system without enforcement of the reactive power limits.}\label{fig:res-ieee9-noQ}
 \end{figure}
 
-\subsubsection{Comparison with the MATPOWER CPF function}
+\subsubsection{Comparison with the \matpower{} CPF function}
 \label{sec:comp-with-matp}
 
 The continuation power flow is implemented in the \matpower function \codemat{runcpf}.
@@ -172,7 +172,7 @@ Comparing with the results in Figure \ref{fig:res-ieee9-noQ}, it can be seen tha
                         --------  --------  --------  --------
                Total:    730.24   1023.02    657.07    234.72
 \end{verbatim}  
-  \caption{Results of the MATPOWER implementation of continuation power flow.}\label{fig:res-ieee9-cpf}
+  \caption{Results of the \matpower{} implementation of continuation power flow.}\label{fig:res-ieee9-cpf}
 \end{figure}
 
 \section{Notations}
@@ -228,7 +228,7 @@ Note that in theory, complementarity constraints
 should be included. 
 However, in practice, solvers will set $v_m^i = v_m^{i,\text{ref}}$ if $q_g^i$ is smaller than $q_g^{i,\text{max}}$ and let $v_m^i$ be free if $q_g^i$ has reached its limit, since doing so maximizes loadability.
 
-\section{Implementation in MATPOWER}
+\section{Implementation in \matpower{}}
 \label{sec:impl-matp}
 
 \subsection{Inputs}
