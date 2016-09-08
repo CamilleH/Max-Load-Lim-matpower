@@ -32,12 +32,12 @@ addParameter(input_checker,'Vlims_bus_nb',default_vlim,check_vlim);
 
 % Direction of change for generators
 default_dir_var_gen = [];
-check_dir_var_gen = @(x)(isnumeric(x) && iscolumn(x));
+check_dir_var_gen = @(x)(isempty(x) || (isnumeric(x) && iscolumn(x)));
 addParameter(input_checker,'dir_var_gen',default_dir_var_gen,check_dir_var_gen);
 
 % Generator numbers of the variable generators;
 default_idx_var_gen = [];
-check_idx_var_gen = @(x)(isnumeric(x) && iscolumn(x));
+check_idx_var_gen = @(x)(isempty(x) || (isnumeric(x) && iscolumn(x)));
 addParameter(input_checker,'idx_var_gen',default_idx_var_gen,check_idx_var_gen);
 
 % Parse
