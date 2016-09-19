@@ -16,7 +16,7 @@ function mpc_vl = prepare_maxloadlim(mpc,dir_mll,varargin)
 
 define_constants;
 n_gen = size(mpc.gen,1);
-
+mpc0 = mpc;
 %% Checking the options, if any
 input_checker = inputParser;
 
@@ -78,7 +78,8 @@ end
 % Initialise with a power flow with q-lims considered
 mpopt = mpoption('pf.enforce_q_lims', options.use_qlim,'verbose',0,'out.all',0);
 mpc = runpf(mpc,mpopt);
-
+% Reset the bus types after the power flow
+mpc.bus(:,BUS_TYPE) = mpc0.bus(:,BUS_TYPE);
 % Convert all loads to dispatchable
 mpc_vl = load2disp(mpc);
 
