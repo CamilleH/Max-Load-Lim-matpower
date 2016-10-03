@@ -183,7 +183,7 @@ classdef Test_maxloadlim < matlab.unittest.TestCase
             % Normalizing with respect to both loads and gens
             gen_load_dir = [dir_load;dir_var_gen];
             dir_load = dir_load/norm(gen_load_dir);
-            dir_var_gen = dir_var_gen/norm(dir_var_gen);
+            dir_var_gen = dir_var_gen/norm(gen_load_dir);
             % Find MLL in the direction of load and gen increase
             results_with_gens = maxloadlim(mpc,dir_load,'verbose',0,'idx_var_gen',idx_var_gen,'dir_var_gen',dir_var_gen);
             % Set gens to their values in previous results and re-run in
