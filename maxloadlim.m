@@ -36,27 +36,81 @@ verbose_levels = [0;1];
 check_verbose = @(x)(isnumeric(x) && isscalar(x) && any(x == verbose_levels));
 addParameter(input_checker,'verbose',default_verbose,check_verbose);
 
+% Direction of change for generators
+default_dir_var_gen = [];
+check_dir_var_gen = @(x)(isempty(x) || (isnumeric(x) && iscolumn(x)));
+addParameter(input_checker,'dir_var_gen',default_dir_var_gen,check_dir_var_gen);
+
+% Generator numbers of the variable generators;
+default_idx_var_gen = [];
+check_idx_var_gen = @(x)(isempty(x) || (isnumeric(x) && iscolumn(x)));
+addParameter(input_checker,'idx_var_gen',default_idx_var_gen,check_idx_var_gen);
+
 input_checker.KeepUnmatched = true;
 parse(input_checker,varargin{:});
 
 options = input_checker.Results;
 
-%% Prepare the matpower case for the maximum loadability limit problem
-mpc_vl = prepare_maxloadlim(mpc,dir_mll,varargin{:});
+%% Iterate the process when considering variable generators
+cur_stab_marg = 0;
+idx_var_gen = options.idx_var_gen;
+dir_var_gen = options.dir_var_gen;
+nb_var_gen = length(idx_var_gen);
+repeat = 1;
+iter = 0;
+iter_max = nb_var_gen;
+settings = varargin;
 
-%% Run opf
-% Turning off the printing and initializing from the base case
-mpopt = mpoption('verbose',options.verbose,'opf.init_from_mpc',1);
-mpopt = mpoption(mpopt,'out.all',0);
-% Decreasing the threshold for the relative complementarity constraints
-mpopt = mpoption(mpopt,'mips.comptol',1e-8);
-% Change solver
-mpopt = mpoption(mpopt,'opf.ac.solver','MIPS');
-% Execute opf
-results = runopf(mpc_vl,mpopt);
-
-%% Post-processing
-results = postproc_maxloadlim(results,dir_mll);
+while iter <= iter_max && repeat
+    if options.verbose
+        fprintf(1,'Beginning of iteration %d\n',iter);
+    end
+    iter = iter + 1;
+    
+    %% Prepare the matpower case for the maximum loadability limit problem
+    mpc_vl = prepare_maxloadlim(mpc,dir_mll,settings{:});
+    
+    %% Run opf
+    % Turning off the printing and initializing from the base case
+    mpopt = mpoption('verbose',options.verbose,'opf.init_from_mpc',1);
+    mpopt = mpoption(mpopt,'out.all',0);
+    % Decreasing the threshold for the relative complementarity constraints
+    mpopt = mpoption(mpopt,'mips.comptol',1e-8);
+    % Change solver
+    mpopt = mpoption(mpopt,'opf.ac.solver','MIPS');
+    % Execute opf
+    results = runopf(mpc_vl,mpopt);
+    
+    %% Post-processing
+    results = postproc_maxloadlim(results,dir_mll);
+    % update the stability margin with that of the current iteration
+    results.stab_marg = results.stab_marg+cur_stab_marg;
+    cur_stab_marg = results.stab_marg;
+    
+    %% Check if it stopped because of a variable generator reached its PMAX
+    % We check the Lagrangian multiplier of Pg<=PMAX
+    gen_hit_pmax = results.var.mu.u.Pg(idx_var_gen) > 1e-4; %1e-4 for numerical error
+    if sum(gen_hit_pmax) == 0
+        % The OPF did not stop because PG = PMAX so we are done.
+        repeat = 0;
+    else
+        % We remove it from the direction of change and the set of variable
+        % generators
+        idx_var_gen(gen_hit_pmax) = [];
+        dir_var_gen(gen_hit_pmax) = [];
+        % We update the settings that are passed down to the function
+        % preparing the constraints
+        var_gen_set = find(strcmp(settings,'idx_var_gen'));
+        settings{var_gen_set+1} = idx_var_gen;
+        dir_gen_set = find(strcmp(settings,'dir_var_gen'));
+        settings{dir_gen_set+1} = dir_var_gen;
+        % We update mpc with the results from the current iteration
+        mpc.bus = results.bus;
+        mpc.gen = results.gen;
+        % Remove OPF infor
+        mpc.gen(:,MU_PMAX:MU_QMIN) = [];
+    end
+end
 
 %% Printing
 if options.verbose
