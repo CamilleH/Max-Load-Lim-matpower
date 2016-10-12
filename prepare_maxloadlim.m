@@ -142,6 +142,8 @@ for bb = 1:length(pv)
     idx_gen_at_bb = find(ismember(mpc_vl.gen(1:n_gen,GEN_BUS),pv(bb)));
     mpc_vl.bus(pv(bb),VMAX) = mpc_vl.gen(idx_gen_at_bb(1),VG);
     mpc_vl.bus(pv(bb),VMIN) = 0.01;
+%     mpc_vl.bus(pv(bb),VMAX) = mpc_vl.gen(idx_gen_at_bb(1),VG);
+%     mpc_vl.bus(pv(bb),VMIN) = mpc_vl.gen(idx_gen_at_bb(1),VG);
 end
 % If we do not consider Qlim, increase Qmax and decrease Qmin 
 % of all generators to arbitrarily large values 

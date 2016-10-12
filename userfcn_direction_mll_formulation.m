@@ -10,6 +10,7 @@ dir_mll = mpc.dir_mll;
 idx_vl = isload(mpc.gen);
 n_vl = sum(idx_vl);
 n_g = size(mpc.gen,1)-n_vl;
+nbus = size(mpc.bus,1);
 if length(dir_mll) ~= n_vl
     error_msg = ['The number of dispatchable loads is not equal to the '...
         'length of the direction vector'];
@@ -44,4 +45,9 @@ if ~isempty(idx_var_gen)
     om = add_constraints(om,'dir_var_gen',A_var_gen,...
         Pg0,Pg0,{'Pg','alpha'});
 end
+
+%% Voltage maximization
+% Finally, we add a cost to maximize voltages so that they are as close as 
+% possible from their upper bounds
+om = add_costs(om,'voltage_cost',struct('Cw',-1e-2*ones(nbus,1)),{'Vm'});
 end
