@@ -49,5 +49,5 @@ end
 %% Voltage maximization
 % Finally, we add a cost to maximize voltages so that they are as close as 
 % possible from their upper bounds
-om = add_costs(om,'voltage_cost',struct('Cw',-1e-2*ones(nbus,1)),{'Vm'});
+% om = add_costs(om,'voltage_cost',struct('Cw',-1e-2*ones(nbus,1)),{'Vm'});
 end

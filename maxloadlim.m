@@ -89,7 +89,7 @@ while iter <= iter_max && repeat
     
     %% Check if it stopped because of a variable generator reached its PMAX
     % We check the Lagrangian multiplier of Pg<=PMAX
-    gen_hit_pmax = results.var.mu.u.Pg(idx_var_gen) > 1e-4; %1e-4 for numerical error
+    gen_hit_pmax = abs(results.gen(idx_var_gen,PMAX)-results.gen(idx_var_gen,PG)) < 1e-4; %1e-4 for numerical error
     if sum(gen_hit_pmax) == 0
         % The OPF did not stop because PG = PMAX so we are done.
         repeat = 0;
@@ -105,10 +105,10 @@ while iter <= iter_max && repeat
         dir_gen_set = find(strcmp(settings,'dir_var_gen'));
         settings{dir_gen_set+1} = dir_var_gen;
         % We update mpc with the results from the current iteration
-        mpc.bus = results.bus;
-        mpc.gen = results.gen;
-        % Remove OPF infor
-        mpc.gen(:,MU_PMAX:MU_QMIN) = [];
+        mpc.bus(:,[PD QD]) = results.bus(:,[PD QD]);
+        mpc.gen(:,PG) = results.gen(:,PG);
+%         % Remove OPF infor
+%         mpc.gen(:,MU_PMAX:MU_QMIN) = [];
     end
 end
 
