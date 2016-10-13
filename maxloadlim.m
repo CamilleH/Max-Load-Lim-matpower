@@ -68,6 +68,12 @@ while iter <= iter_max && repeat
     iter = iter + 1;
     
     %% Prepare the matpower case for the maximum loadability limit problem
+    % We remove reactive power limits of the slack bus since, by
+    % assumption, the slack bus is a strong grid.
+    [ref,~] = bustypes(mpc.bus,mpc.gen);
+    gen_ref = ismember(mpc.gen(:,GEN_BUS),ref);
+    mpc.gen(gen_ref,QMAX) = 9999;
+    mpc.gen(gen_ref,QMIN) = -9999;
     mpc_vl = prepare_maxloadlim(mpc,dir_mll,settings{:});
     
     %% Run opf
@@ -89,7 +95,12 @@ while iter <= iter_max && repeat
     
     %% Check if it stopped because of a variable generator reached its PMAX
     % We check the Lagrangian multiplier of Pg<=PMAX
-    gen_hit_pmax = abs(results.gen(idx_var_gen,PMAX)-results.gen(idx_var_gen,PG)) < 1e-4; %1e-4 for numerical error
+    if isempty(idx_var_gen)
+        gen_hit_pmax = 0;
+    else
+        gen_hit_pmax = (abs(results.gen(idx_var_gen,PMAX)-results.gen(idx_var_gen,PG)) < 5e-4) | ...
+            (results.var.mu.u.Pg(idx_var_gen) > 1e-4); %1e-4 for numerical error
+    end
     if sum(gen_hit_pmax) == 0
         % The OPF did not stop because PG = PMAX so we are done.
         repeat = 0;
@@ -107,6 +118,7 @@ while iter <= iter_max && repeat
         % We update mpc with the results from the current iteration
         mpc.bus(:,[PD QD]) = results.bus(:,[PD QD]);
         mpc.gen(:,PG) = results.gen(:,PG);
+        mpc.bus(:,[VM VA]) = results.bus(:,[VM VA]);
 %         % Remove OPF infor
 %         mpc.gen(:,MU_PMAX:MU_QMIN) = [];
     end

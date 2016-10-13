@@ -1,4 +1,4 @@
-function t_AgainstMatpowerCPF_case9(quiet)
+function t_cpf_case9(quiet)
 % This function tests the maxloadlim extension to the OPF in MATPOWER
 % against MATPOWER implementation of a CPF
 if nargin < 1

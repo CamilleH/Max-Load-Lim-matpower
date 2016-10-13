@@ -25,9 +25,9 @@ for i = 1:nb_dir_load
     dir_load = dir_all(i,:)';
     dir_load(~idx_nonzero_loads)=0;
     for j = 1:nb_dir_gen
-        if sum(dir_load) == 0
+        if sum(dir_load) == 0 || dir_load(31) ~= 0
             % The code does not currently support load increase at
-            % nonzero loads.
+            % nonzero loads or at the slack bus
             t = sprintf('%s All load zeros => SKIPPED',t0);
             t_is(1,1,0,t);
         else
@@ -52,7 +52,7 @@ for i = 1:nb_dir_load
             mll_without_gen = results_without_gens.bus(:,PD);
             % We compare with a precision of 1MW
             t = sprintf('%sLOAD: %s   GEN: %s',t0,mat2str(dir_load),mat2str(dir_var_gen));
-            t_is(mll_with_gen,mll_without_gen,0,t);
+            ok = t_is(mll_with_gen,mll_without_gen,0,t);
         end
     end
 end

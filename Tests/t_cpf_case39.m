@@ -1,4 +1,4 @@
-function t_AgainstMatpowerCPF_case39(quiet)
+function t_cpf_case39(quiet)
 % This function tests the maxloadlim extension to the OPF in MATPOWER
 % against MATPOWER implementation of a CPF
 if nargin < 1
@@ -32,7 +32,7 @@ for i = 1:nb_dir
         mpc_target = mpc;
         nonzero_loads = mpc_target.bus(:,PD) ~= 0;
         Q_P = mpc_target.bus(nonzero_loads,QD)./mpc_target.bus(nonzero_loads,PD);
-        mpc_target.bus(:,PD) = mpc_target.bus(:,PD)+2*dir*mpc_target.baseMVA;
+        mpc_target.bus(:,PD) = mpc.bus(:,PD)+2*dir*mpc_target.baseMVA;
         mpc_target.bus(nonzero_loads,QD) = Q_P.*mpc_target.bus(nonzero_loads,PD);
         % Run the CPF with matpower
         [results,~] = runcpf(mpc,mpc_target,mpoption('out.all',0,'verbose',0));
