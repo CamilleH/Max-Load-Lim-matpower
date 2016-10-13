@@ -16,7 +16,10 @@ results.bus(idx_bus_load_disp ,[PD QD]) = -results.gen(idx_gen_load_disp,[PG QG]
 results.gen(idx_gen_load_disp,:) = [];
 results.gencost(idx_gen_load_disp,:) = [];
 % Removing the shadow prices corresponding to dispatchable loads
+results.var.mu.u.Pg(idx_gen_load_disp) = [];
+results.var.mu.l.Pg(idx_gen_load_disp) = [];
 results.var.mu.u.Qg(idx_gen_load_disp) = [];
+results.var.mu.l.Qg(idx_gen_load_disp) = [];
 % If all gens at bus have non zero reactive power shadow prices, this bus
 % is PQ
 for bb = 1:size(results.bus,1)
