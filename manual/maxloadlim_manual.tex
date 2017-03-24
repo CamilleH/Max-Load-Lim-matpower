@@ -48,7 +48,7 @@
 
 The following code looks for the maximum loadability point limit in a the direction of load increase defined by \codemat{dir\_mll}.
 
-\lstinputlisting[language=Matlab,firstline=2,lastline=11]{../Examples/example_ieee9.m}
+\lstinputlisting[language=Matlab,firstline=2,lastline=11]{../examples/example_ieee9.m}
 
 The printed results are shown in Figure \ref{fig:res-ieee9}. 
 The first block of information gives information about the stability margin to the maximum loadability limit (MLL) point and the type of bifurcation at the MLL point. 
@@ -99,7 +99,7 @@ Reactive power production and voltages at the generators
 In this example, the reactive power limits are not enforced in the search for the MLL point. 
 This is done by setting the flag \codemat{use\_qlim} to 0.
 
-\lstinputlisting[language=Matlab,firstline=13,lastline=15]{../Examples/example_ieee9.m}
+\lstinputlisting[language=Matlab,firstline=13,lastline=15]{../examples/example_ieee9.m}
 
 The results are shown in Figure \ref{fig:res-ieee9-noQ}.
 Since the reactive power limits are not enforced, the maximum loadability limit point is now a saddle-node bifurcation point (SNB).
@@ -146,7 +146,7 @@ The continuation power flow is implemented in the \matpower function \codemat{ru
 It does not consider reactive power limits.
 The following code runs the continuation power flow in the same direction of load increase as in the previous section (load increase at bus 7).
 
-\lstinputlisting[language=Matlab,firstline=17]{../Examples/example_ieee9.m}
+\lstinputlisting[language=Matlab,firstline=17]{../examples/example_ieee9.m}
 
 The results are shown in Figure \ref{fig:res-ieee9-cpf}.
 Comparing with the results in Figure \ref{fig:res-ieee9-noQ}, it can be seen that both algorithms lead to very similar results; the small differences can be explained by the step length of the CPF algorithm.
