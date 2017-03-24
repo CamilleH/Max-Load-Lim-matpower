@@ -1,7 +1,16 @@
-addpath('../');
-%% Examples of using the maximum loadability limit (MLL) search with 
-% the IEEE 39
-clear,clc;
+%EXAMPLE_IEEE39 Examples of using maximum loadability limit (MLL) search with 
+%   the IEEE 39
+
+%   MATPOWER
+%   Copyright (c) 2015-2016, Power Systems Engineering Research Center (PSERC)
+%   by Camille Hamon
+%
+%   This file is part of MATPOWER.
+%   Covered by the 3-clause BSD License (see LICENSE file for details).
+%   See http://www.pserc.cornell.edu/matpower/ for more info.
+
+%addpath('../');
+%clear,clc;
 
 % Loading the system and defining parameters
 mpc = loadcase('case39'); % load ieee9

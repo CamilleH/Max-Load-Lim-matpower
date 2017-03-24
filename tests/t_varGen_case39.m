@@ -1,6 +1,15 @@
 function t_varGen_case39(quiet)
 % This function tests the implementation of the variable generators in the
 % IEEE 39 bus system
+
+%   MATPOWER
+%   Copyright (c) 2015-2016, Power Systems Engineering Research Center (PSERC)
+%   by Camille Hamon
+%
+%   This file is part of MATPOWER.
+%   Covered by the 3-clause BSD License (see LICENSE file for details).
+%   See http://www.pserc.cornell.edu/matpower/ for more info.
+
 if nargin < 1
     quiet = 0;
 end
@@ -56,4 +65,4 @@ for i = 1:nb_dir_load
         end
     end
 end
-t_end;
+t_end
