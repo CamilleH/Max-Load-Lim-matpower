@@ -1,3 +1,11 @@
-# MaxLoadLim
+# mx-maxloadlim
 
-Matlab code to find loadability limits in power systems. It is based on Matpower. In particular, it uses dispatchable loads to maximize the loadability limits.
+Matlab code to find loadability limits in power systems. It is based
+on MATPOWER. In particular, it uses dispatchable loads to maximize
+the loadability limits.
+
+by Camile Hamon
+
+master copy maintained at:
+
+https://github.com/CamilleH/Max-Load-Lim-matpower
