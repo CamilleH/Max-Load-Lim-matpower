@@ -2,6 +2,14 @@ function om = userfcn_direction_mll_formulation(om,args)
 % USERFCN_DIRECTION_MLL_FORMULATION adds one variable and as many
 % constraints as dispatchable loads to enforce the load increase direction
 
+%   MATPOWER
+%   Copyright (c) 2015-2016, Power Systems Engineering Research Center (PSERC)
+%   by Camille Hamon
+%
+%   This file is part of MATPOWER.
+%   Covered by the 3-clause BSD License (see LICENSE file for details).
+%   See http://www.pserc.cornell.edu/matpower/ for more info.
+
 define_constants;
 mpc = get_mpc(om);
 dir_mll = mpc.dir_mll;
@@ -43,5 +51,4 @@ if ~isempty(idx_var_gen)
     A_var_gen = sparse(idx_A_var_gen_i,idx_A_var_gen_j,vals_A_var_gen,nb_var_gen,n_g+n_vl+1);
     om = add_constraints(om,'dir_var_gen',A_var_gen,...
         Pg0,Pg0,{'Pg','alpha'});
-end
 end
